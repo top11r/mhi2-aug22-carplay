@@ -2,6 +2,13 @@
 #
 # install.sh - installs the MHI2 AU37x CarPlay patches ON THE UNIT.
 #
+# PRIVATE K3346 BUILD (MHI2_ER_AUG22_K3346, MU1438) - not for distribution.
+# His v1.1.11 installer, ported to what was tested on the car: K3346 only,
+# HMI jars rebuilt against the MU1438 HMI, libcarplay_hook.so with the K3346
+# patches, no compiled shaders (both renderers compile their built-in GLSL
+# with the unit's own compiler), no phone tab, no parking popup, and the
+# K3346 stage test installs taken over.
+#
 # Runs on the head unit itself (QNX 6.5 /bin/sh) - either over ssh/telnet
 # after copying this directory across, or from the SD card via M.I.B.
 # (Advanced Settings -> Run Custom Script; see custom.sh).
@@ -123,7 +130,7 @@ die() {
 }
 
 : > "$LOG" 2>/dev/null
-say "=== MHI2 AU37x CarPlay patches - install ==="
+say "=== MHI2 AU37x CarPlay patches - install (private K3346 build) ==="
 if [ -f "$SRC_DIR/VERSION" ]; then
     read -r VERSION < "$SRC_DIR/VERSION"
     say "release: $VERSION"
@@ -186,14 +193,12 @@ done
 
 TRAIN_OK=""
 case "$TRAIN" in
-    MHI2_ER_AU37[xX]_P[0-9][0-9][0-9][0-9]*)
-        ER_BUILD=${TRAIN#MHI2_ER_AU37?_P}; ER_BUILD=${ER_BUILD%"${ER_BUILD#????}"}
-        if er_build_too_old "$ER_BUILD"; then TRAIN_OK=2; else TRAIN_OK=1; fi ;;
-    MHI2_*_AU37[xX]_*|MHI2_*_AU276_*) TRAIN_OK=1 ;;
+    MHI2_*_AUG22_K3346*) TRAIN_OK=1 ;;
     "") ;;
     *) TRAIN_OK=0 ;;
 esac
 
+# EEPROM: "MHI2_" at 0..4, "_AUG22_" at 7..13, "K3346" at 14..18.
 if [ -z "$TRAIN_OK" ]; then
     HEX=""
     for tok in $(on -f rcc /net/rcc/usr/apps/modifyE2P r 3A0 19 2>/dev/null); do
@@ -202,15 +207,8 @@ if [ -z "$TRAIN_OK" ]; then
         esac
     done
     case "$HEX" in
-        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 33 37 "[57]"8 5"[fF]*)
-            ER_BUILD=$(er_build_from_hex "$HEX")
-            if er_build_too_old "$ER_BUILD"; then
-                TRAIN_OK=2; TRAIN="MHI2_ER_AU37x_P$ER_BUILD (from EEPROM)"
-            else
-                TRAIN_OK=1; TRAIN="MHI2_??_AU37x_* (from EEPROM)"
-            fi ;;
-        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 32 37 36 5"[fF]*)
-            TRAIN_OK=1; TRAIN="MHI2_??_AU276_* (from EEPROM)" ;;
+        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 36"*)
+            TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3346 (from EEPROM)" ;;
         "") ;;
         *) TRAIN_OK=0; TRAIN="(EEPROM bytes:$HEX)" ;;
     esac
@@ -219,21 +217,12 @@ fi
 case "$TRAIN_OK" in
     1) say "firmware train: $TRAIN - ok" ;;
     0) say "!! firmware train: $TRAIN"
-       say "!! These patches are for MHI2_*_AU37x_* and MHI2_*_AU276_* firmware only."
-       say "!! They replace stock HMI classes of that firmware, and on another train"
-       say "!! they can leave the main screen black. See"
-       say "!! https://github.com/chefranov/mhi2-au37x-carplay/wiki/Compatibility"
+       say "!! This private build is for MHI2_*_AUG22_K3346 only: its jars are built"
+       say "!! against that firmware's HMI and its hook carries that firmware's"
+       say "!! offsets; on another one they can leave the main screen black."
        die "unsupported firmware train" ;;
-    2) say "!! firmware train: $TRAIN"
-       say "!! This AU37x build is older than the HMI classes these patches replace:"
-       say "!! the D-pad and route guidance do not match it, and installing would most"
-       say "!! likely keep the MMI from starting. Update the firmware first (P5089 is"
-       say "!! the tested build). See"
-       say "!! https://github.com/chefranov/mhi2-au37x-carplay/wiki/Compatibility"
-       die "firmware build too old" ;;
     *) say "!! could not read the firmware train (no CachedTrain.txt, no EEPROM answer)."
        say "!! Installing without knowing it is how a black main screen happens."
-       say "!! Please open an issue and attach this log."
        die "firmware train unknown" ;;
 esac
 
@@ -250,18 +239,11 @@ if [ "$RGI" != "0" ]; then
     for f in maneuver_render flag_atlas.rgba rgd_blank.png; do
         [ -f "$BIN_DIR/$f" ] || die "missing payload file: $BIN_DIR/$f (or set RGI=0)"
     done
-    for s in $SHADERS; do
-        [ -f "$BIN_DIR/shaders/$s.bin" ] || \
-            die "missing compiled shader: $BIN_DIR/shaders/$s.bin (or set RGI=0)"
-    done
+    # K3346: no compiled shaders - see the route-guidance step.
     say "route guidance: ON (RGI=0 skips it)"
     if [ "$ALTSCREEN" != "0" ]; then
         for f in altscreen_render altscreen_sup.sh; do
             [ -f "$BIN_DIR/$f" ] || die "missing payload file: $BIN_DIR/$f (or set ALTSCREEN=0)"
-        done
-        for s in $ALT_SHADERS; do
-            [ -f "$BIN_DIR/altscreen_shaders/$s.bin" ] || \
-                die "missing compiled shader: $BIN_DIR/altscreen_shaders/$s.bin (or set ALTSCREEN=0)"
         done
         say "CarPlay map in the cluster: ON (ALTSCREEN=0 skips it)"
     else
@@ -326,6 +308,14 @@ done
 if [ -f "$LSD_SH" ] && grep -q -e 'BOOTCLASSPATH="/' -e '/mnt/app/root/' "$LSD_SH"; then
     say "!! $LSD_SH has been changed: it puts other code on the HMI classpath."
     say "!!   Uninstall whatever changed it first (MIBSI does this)."
+    CONFLICT=1
+fi
+
+# K3346 stage 1 (passive route-guidance test): its RESTORE first.  Stages 2,
+# 3a and 3b are taken over further down.
+if [ -d /mnt/app/k3346-stage1 ] || [ -f /mnt/app/rgd_passive ]; then
+    say "!! the K3346 stage 1 test is still installed (/mnt/app/k3346-stage1 or rgd_passive)."
+    say "!!   Run RESTORE from the stage 1 card first, then this again."
     CONFLICT=1
 fi
 
@@ -424,6 +414,43 @@ rm -f /mnt/app/.rwtest
 touch /mnt/system/.rwtest 2>/dev/null || die "/mnt/system is not writable"
 rm -f /mnt/system/.rwtest
 say "ok: /mnt/app and /mnt/system are writable"
+
+# ---------------------------------------------------------------- K3346 stages
+# The stage test cards (2: jars behind a boot guard in lsd.sh, 3a: the hook in
+# the config, 3b: the mm-ipod shim) each keep the stock file they replaced.
+# Put those back, so the backups below are of stock files and the install runs
+# as on a stock unit, then drop the stage folders and their test markers.
+ST2=/mnt/app/k3346-stage2; ST3=/mnt/app/k3346-stage3; ST3B=/mnt/app/k3346-stage3b
+size_of() { [ -f "$1" ] || { echo ""; return; }; set -- $(ls -l "$1" 2>/dev/null); echo "$5"; }
+put_back() {  # put_back <backup> <target> <size> <mode>
+    [ "$(size_of "$1")" = "$3" ] || die "stage backup $1 is not the stock file (size) - restore by hand"
+    cp "$1" "$2.new" && chmod "$4" "$2.new" && mv "$2.new" "$2" || die "could not put $2 back from $1"
+    say "stock back: $2 (from $1)"
+}
+if [ -d "$ST2" ] || [ -d "$ST3" ] || [ -d "$ST3B" ]; then
+    say ""
+    say "--- taking over the K3346 stage installs ---"
+    if grep -q 'k3346-stage2' "$LSD_SH" 2>/dev/null; then
+        put_back "$ST2/lsd.sh.orig" "$LSD_SH" 15079 755
+    fi
+    if grep "libcarplay_hook.so" "$CFG" > /dev/null 2>&1 && [ ! -f "$CFG.orig" ] && [ -f "$ST3/smartphone_integrator.json.orig" ]; then
+        [ "$(size_of "$ST3/smartphone_integrator.json.orig")" = 6788 ] \
+            || die "stage backup of the config is not the stock file (size) - restore by hand"
+        cat "$ST3/smartphone_integrator.json.orig" > "$CFG" || die "could not put $CFG back"
+        say "stock back: $CFG (from $ST3)"
+    fi
+    if [ -f "$SBIN/rgd_real/mm-ipod" ] && [ ! -f "$SBIN/mm-ipod.orig" ]; then
+        put_back "$SBIN/rgd_real/mm-ipod" "$SBIN/mm-ipod" 40297 755
+        rm -f "$SBIN/rgd_real/mm-ipod" && rm -r "$SBIN/rgd_real" 2>/dev/null
+    fi
+    rm -f /mnt/app/rgd_enable /mnt/app/altscreen_fps /mnt/app/altscreen_no_viewareas \
+          "$LIB_DIR/altscreen_render.5ms"
+    for d in "$ST2" "$ST3" "$ST3B"; do
+        [ -d "$d" ] && rm -r "$d" 2>/dev/null
+        [ -d "$d" ] && rm -rf "$d"
+    done
+    say "ok: stage folders removed; continuing as on a stock unit"
+fi
 
 # ---------------------------------------------------------------- backup
 backup_once() {
@@ -599,16 +626,17 @@ if [ "$RGI" != "0" ]; then
     # the displayable does not exist and the cluster overlay never appears.
     say "ok: $BLANK"
 
-    # Compiled shaders. This firmware ships no GLSL compiler at all - the GL
-    # driver looks for a plugin that is not in the image - so the renderer loads
-    # its shaders as platform binaries instead of compiling them. Without these
-    # it cannot draw.
-    [ -d "$SHADER_DIR" ] || mkdir -p "$SHADER_DIR" || die "could not create $SHADER_DIR"
-    for s in $SHADERS; do
-        cp "$BIN_DIR/shaders/$s.bin" "$SHADER_DIR/$s.bin" || die "copy $s.bin failed"
-    done
-    chmod 644 "$SHADER_DIR"/*.bin 2>/dev/null
-    say "ok: $SHADER_DIR"
+    # K3346: NO compiled shaders.  His blobs come from the AU37x GPU driver
+    # (17.54); this unit runs 17.37, whose run-time compiler (libcgdrv.so in
+    # /mnt/app/root/lib-target) compiles the renderer's built-in GLSL.  A blob
+    # directory would be loaded first, so one an earlier install left goes.
+    if [ -d "$SHADER_DIR" ]; then
+        rm -f "$SHADER_DIR"/*.bin 2>/dev/null
+        rm -r "$SHADER_DIR" 2>/dev/null
+        say "removed: $SHADER_DIR (blobs for another GPU driver)"
+    fi
+    touch /mnt/app/rgd_no_tel || die "could not create /mnt/app/rgd_no_tel"
+    say "ok: no phone tab in this build (/mnt/app/rgd_no_tel)"
 
     # The supervisor keeps exactly one renderer alive. Started by the shim
     # below, so it comes up with the CarPlay session and goes with the ignition.
@@ -625,7 +653,7 @@ LOCK=/dev/shmem/rgd_render_sup.pid
 # which the renderer dlopens to create its window; the lib directory is its
 # own, and being in it also lets it find flag_atlas.rgba and shaders/ by
 # relative path.
-LD_LIBRARY_PATH=/mnt/app/eso/hmi/lib:/eso/lib:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=/mnt/app/eso/hmi/lib:/eso/lib:$LD_LIBRARY_PATH:/mnt/app/root/lib-target
 export LD_LIBRARY_PATH
 cd /mnt/app/eso/hmi/lib 2>/dev/null
 
@@ -758,12 +786,12 @@ if [ "$ALTSCREEN" != "0" ]; then
     mv "$ALT_SUP.new" "$ALT_SUP" || die "could not put altscreen_sup.sh in place"
     say "ok: $ALT_SUP"
 
-    [ -d "$ALT_SHADER_DIR" ] || mkdir -p "$ALT_SHADER_DIR" || die "could not create $ALT_SHADER_DIR"
-    for s in $ALT_SHADERS; do
-        cp "$BIN_DIR/altscreen_shaders/$s.bin" "$ALT_SHADER_DIR/$s.bin" || die "copy $s.bin failed"
-    done
-    chmod 644 "$ALT_SHADER_DIR"/*.bin 2>/dev/null
-    say "ok: $ALT_SHADER_DIR"
+    # K3346: no compiled shaders here either (see route guidance).
+    if [ -d "$ALT_SHADER_DIR" ]; then
+        rm -f "$ALT_SHADER_DIR"/*.bin 2>/dev/null
+        rm -r "$ALT_SHADER_DIR" 2>/dev/null
+        say "removed: $ALT_SHADER_DIR (blobs for another GPU driver)"
+    fi
 
     touch "$ALT_ON" || die "could not create $ALT_ON"
     say "ok: switched on"
@@ -829,10 +857,9 @@ ls -l "$JARS_DIR/dpad_hook.jar" "$JARS_DIR/coverart_hook.jar" "$SO_DEST" 2>&1 | 
 if [ "$RGI" != "0" ]; then
     ls -l "$RGD_JAR" "$RGD_SO" "$RENDER" "$ATLAS" "$BLANK" "$SUPERVISOR" "$SBIN/mm-ipod" 2>&1 \
         | while IFS= read -r l; do say "$l"; done
-    ls -l "$SHADER_DIR" 2>&1 | while IFS= read -r l; do say "$l"; done
 fi
 if [ "$ALTSCREEN" != "0" ]; then
-    ls -l "$ALT_RENDER" "$ALT_SUP" "$ALT_SHADER_DIR" 2>&1 | while IFS= read -r l; do say "$l"; done
+    ls -l "$ALT_RENDER" "$ALT_SUP" 2>&1 | while IFS= read -r l; do say "$l"; done
 fi
 
 say ""
@@ -861,7 +888,8 @@ if [ "$ALTSCREEN" != "0" ]; then
     say ""
     say "The CarPlay map is in the cluster in place of the stock one.  A long"
     say "press of the left steering-wheel roller swaps it for the stock map and"
-    say "back; the choice is kept."
+    say "back while /mnt/app is writable (this build does not remount it, so the"
+    say "choice is not kept across ignition)."
 fi
 say ""
 say "This log: $LOG"

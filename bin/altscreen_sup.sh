@@ -1,16 +1,17 @@
 #!/bin/sh
-# Keeps one altscreen_render --listen alive while the CarPlay map in the
-# cluster is switched on (/mnt/app/altscreen_inject).  Started in the
-# background by rgd_render_sup.sh, i.e. with the iAP2 session.  POSIX sh only:
-# the unit has no awk, sed or pgrep on PATH.
+# K3346 stage 3b: keeps one altscreen_render --listen alive while the cluster
+# map is switched on (/mnt/app/altscreen_inject). Started in the background by
+# the mm-ipod shim, i.e. with the CarPlay session. Private copy of chefranov's
+# altscreen_sup.sh without its `mount -uw /mnt/app`: /mnt/app stays read-only,
+# so the steering-wheel on/off choice is not saved across sessions.
 BIN=/mnt/app/eso/hmi/lib/altscreen_render
 LOG=/dev/null
 LOCK=/dev/shmem/altscreen_sup.pid
 FLAG=/dev/shmem/altscreen_live
 MARKER=/mnt/app/altscreen_inject
-# libdisplayinit and the GL driver's libcgdrv, as for maneuver_render; at the
-# end what the hardware decoder (NvSS) loads besides:
-# libnvparser and libnvmedia.
+# libdisplayinit (/eso/lib), the GL run-time compiler libcgdrv
+# (/mnt/app/root/lib-target, used because no shader blobs are installed) and
+# the hardware decoder's libraries.
 LD_LIBRARY_PATH=/eso/lib:/mnt/app/eso/hmi/lib:/lib:/usr/lib:$LD_LIBRARY_PATH:/mnt/app/root/lib-target:/mnt/app/armle/lib:/mnt/app/armle/usr/lib
 export LD_LIBRARY_PATH
 
@@ -23,21 +24,13 @@ if [ -f "$LOCK" ]; then
 fi
 echo $$ > "$LOCK"
 
-# /mnt/app is read-only after every boot, and then the steering-wheel on/off
-# choice cannot be saved.  Open it for the session; mount -uw on an already
-# writable mount is harmless.
-mount -uw /mnt/app 2>/dev/null
-
 while [ -f "$MARKER" ]; do
     "$BIN" --listen >> "$LOG" 2>&1
     rc=$?
     # A dead renderer must not leave the cluster on a context whose map
     # window is gone.
     rm -f "$FLAG"
-    # 0 is a planned restart - one hardware decoder per process, so every new
-    # sender or picture size takes a fresh one - and the hook is already
-    # reconnecting: two seconds here were two seconds of the stock map.  A
-    # crash still waits.
+    # 0 is a planned restart (one hardware decoder per process); a crash waits.
     [ "$rc" -eq 0 ] || sleep 2
 done
 rm -f "$LOCK"
