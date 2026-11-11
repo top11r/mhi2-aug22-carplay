@@ -4,7 +4,7 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
-## v1.0.0 — 2026-11-12
+## k3346-v1.0.0 — 2026-11-12
 
 - **First AUG22 K3346 build**, based on chefranov's
   [v1.1.11](https://github.com/chefranov/mhi2-au37x-carplay/releases/tag/v1.1.11):
