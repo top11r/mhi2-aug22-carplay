@@ -34,18 +34,20 @@ What it adds on AUG22 K3346:
 - **No parking popup**: not ported to this HMI.
 - **`altscreen_sup.sh`** does not remount `/mnt/app` writable.
 - **Cluster-map intro**: shows "CarPlay Navigation" and "Loading…".
-- **Takes over the K3346 stage test installs** (stages 2, 3a, 3b): their stock backups
-  go back first, then the normal install runs. Stage 1 has to be restored by hand first.
 
 ## Compatibility
 
 Tested on `MHI2_ER_AUG22_K3346`, MU1438, with the Virtual Cockpit and the HARMAN iAP2
 stack. Remove any other CarPlay or HMI mod first; the installer stops if it finds one.
 
-- **CarPlay map in the cluster** needs the iPhone **by cable**. A Carlinkit Mini Ultra 3
-  runs CarPlay but does not open the cluster stream with this unit. Zooming with the
-  roller works by cable only.
-- **Cover art** needs module **17**, adaptation `Picture_Upload_Download` = **active**.
+- **CarPlay map in the cluster** works by cable and through a wireless adapter that
+  passes the cluster stream:
+  - **Ottocast Mini Cube 3**: confirmed.
+  - **Carlinkit Mini Ultra 3**: not proven; CarPlay runs, but the cluster stream was not
+    opened. A firmware update of the adapter might be needed.
+
+  Zooming with the roller works by cable only.
+- **No coding or adaptations** are needed on the unit.
 - **Route guidance** works with Apple Maps and Google Maps. Waze sends no turn-by-turn
   data over CarPlay; its map still shows in the cluster.
 
