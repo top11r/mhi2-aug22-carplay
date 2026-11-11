@@ -3,10 +3,10 @@
 A private build for Audi MHI2 head units on **`MHI2_ER_AUG22_K3346`** (MU1438), based on
 **[chefranov's CarPlay patches](https://github.com/chefranov/mhi2-au37x-carplay)** (v1.1.11).
 His installer, jars and native parts do all the work; this build ports them to the
-AUG22 K3346 firmware and keeps only what was tested there.
+AUG22 K3346 firmware and keeps only what was tested there. The modifications are made
+**with chefranov's permission**.
 
-> **Private build, not for distribution.** The original project's licence does not allow
-> sharing builds derived from it. Use at your own risk; everything is reversible.
+> **Private build.** Use at your own risk; everything is reversible.
 
 What it adds on AUG22 K3346:
 
