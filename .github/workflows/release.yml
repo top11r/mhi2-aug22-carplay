@@ -23,11 +23,11 @@ jobs:
           cp custom.sh command.sh stage/mod/
           cp -r install.sh uninstall.sh bin stage/mod/carplay/
           echo "$VER" > stage/mod/carplay/VERSION
-          (cd stage && zip -q -r -X ../dist/mhi2-au37x-carplay-$VER-sd.zip mod)
+          (cd stage && zip -q -r -X ../dist/mhi2-aug22-carplay-$VER-sd.zip mod)
           # The same card with the UNINSTALL marker: running the script removes
           # everything instead of installing.
           touch stage/mod/carplay/UNINSTALL
-          (cd stage && zip -q -r -X ../dist/mhi2-au37x-carplay-$VER-uninstall-sd.zip mod)
+          (cd stage && zip -q -r -X ../dist/mhi2-aug22-carplay-$VER-uninstall-sd.zip mod)
           (cd dist && sha256sum *.zip) > dist/SHA256SUMS
           (cd stage/mod/carplay && find bin -type f 2>/dev/null | LC_ALL=C sort | xargs sha256sum) >> dist/SHA256SUMS
 
