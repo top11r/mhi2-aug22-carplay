@@ -27,10 +27,18 @@ What it adds on AUG22 K3346:
 - **`libcarplay_hook.so`**: patched for the K3346 CarPlay library: the cluster stream's
   socket family, the session key's offset, `TCP_NODELAY` on the link to the cluster-map
   renderer (smooth zoom), and roller zoom steps 262 ms apart (no skipped steps).
+- **`altscreen_render`** (the cluster-map renderer): decodes a frame as soon as one is
+  waiting instead of only when five are buffered (it can catch up after bursts), and
+  passes the hardware decoder timestamp 0, so it no longer drops frames it considers late.
 - **No compiled shaders**: the K3346 GPU driver (17.37) compiles the renderers' built-in
   GLSL with its own run-time compiler, so no shader files are shipped or installed, and
   ones an earlier install left are removed.
 - **No phone tab**: the CarPlay call tap does not exist on this HMI (`rgd_no_tel` is set).
+- **The car's own route is cancelled** when CarPlay route guidance starts (`rgd_cancel_native`
+  is set): otherwise a route the car's navigation holds (resumed after a restart, or picked
+  up when the phone was already navigating at connect) keeps the cluster.
+- **`rgd_hook.jar`** also fixes the update of the cockpit's own maneuver tile, which failed
+  in every K3346 build.
 - **No parking popup**: not ported to this HMI.
 - **`altscreen_sup.sh`** does not remount `/mnt/app` writable.
 - **Cluster-map intro**: shows "CarPlay Navigation" and "Loading…".
