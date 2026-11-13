@@ -4,7 +4,7 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
-## Unreleased
+## k3346-v1.0.2 — 2026-11-14
 
 - **CarPlay map in the cluster: smoother with Apple Maps.** The cluster renderer
   now catches up as soon as a frame is waiting instead of pacing every frame to a
