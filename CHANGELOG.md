@@ -4,6 +4,13 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## Unreleased
+
+- **Route guidance: lane guidance clears when the next maneuver has none.** After a
+  maneuver with lanes, the maneuver tile kept showing its lanes until the next
+  maneuver that had lanes of its own; the tile now drops them as soon as CarPlay
+  stops sending lane guidance, together with the cluster's own lane panel.
+
 ## k3346-v1.0.0 — 2026-11-12
 
 - **First AUG22 K3346 build**, based on chefranov's

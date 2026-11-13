@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # rgd_hook.jar must carry its non-class resources: VCTextData reads
+      # vc-text.bin on first use (VC street scroll) and throws without it.
+      - name: Check the jar resources
+        run: |
+          set -eu
+          for e in com/mhi2/carplay/rgd/vc-text.bin META-INF/UNICODE-LICENSE.txt; do
+            unzip -Z1 bin/rgd_hook.jar | grep -qx "$e" || { echo "bin/rgd_hook.jar: missing $e"; exit 1; }
+          done
+
       - name: Build the SD card archives
         run: |
           set -eu
