@@ -637,6 +637,12 @@ if [ "$RGI" != "0" ]; then
     fi
     touch /mnt/app/rgd_no_tel || die "could not create /mnt/app/rgd_no_tel"
     say "ok: no phone tab in this build (/mnt/app/rgd_no_tel)"
+    # The car's own navigation can hold a route of its own (one it resumes after
+    # a restart, or picks up when the phone is already navigating at connect) and
+    # then takes the cluster. With this marker the jar cancels that route when
+    # CarPlay route guidance takes over (chefranov's switch, off in his release).
+    touch /mnt/app/rgd_cancel_native || die "could not create /mnt/app/rgd_cancel_native"
+    say "ok: the car's own route is cancelled when CarPlay route guidance starts (/mnt/app/rgd_cancel_native)"
 
     # The supervisor keeps exactly one renderer alive. Started by the shim
     # below, so it comes up with the CarPlay session and goes with the ignition.
