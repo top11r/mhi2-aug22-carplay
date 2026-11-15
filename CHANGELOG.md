@@ -4,6 +4,15 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## Unreleased
+
+- **Route guidance: the cockpit's navigation tab no longer keeps the car's own
+  arrow.** After the car's navigation had run (a route, or one it predicted home),
+  the arrow in the cockpit's navigation tab stayed fixed for the whole CarPlay
+  route while distance and arrival time updated. The cockpit was told to draw that
+  arrow from its compass data; it now takes it from the maneuvers CarPlay sends.
+  `/mnt/app/rgd_rgtype` still overrides the mode.
+
 ## k3346-v1.0.2 — 2026-11-14
 
 - **CarPlay map in the cluster: smoother with Apple Maps.** The cluster renderer
