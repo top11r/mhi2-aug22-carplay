@@ -4,7 +4,7 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
-## Unreleased
+## k3346-v1.0.3 — 2026-11-15
 
 - **Route guidance: the cockpit's navigation tab no longer keeps the car's own
   arrow.** After the car's navigation had run (a route, or one it predicted home),
