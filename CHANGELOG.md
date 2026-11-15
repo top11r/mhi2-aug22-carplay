@@ -12,6 +12,8 @@ on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay
   route while distance and arrival time updated. The cockpit was told to draw that
   arrow from its compass data; it now takes it from the maneuvers CarPlay sends.
   `/mnt/app/rgd_rgtype` still overrides the mode.
+- **Installer: `MHI2_US_AUG22_K3347` is accepted.** It runs the same HMI release with
+  byte-identical CarPlay natives as K3346, and a user confirmed it on the car.
 
 ## k3346-v1.0.2 — 2026-11-14
 
