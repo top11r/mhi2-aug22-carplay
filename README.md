@@ -20,8 +20,8 @@ What it adds on AUG22 K3346:
 
 ## What differs from chefranov's release
 
-- **Firmware**: the installer accepts `MHI2_*_AUG22_K3346` only (from `CachedTrain.txt`
-  or the EEPROM) and stops, changing nothing, on anything else.
+- **Firmware**: the installer accepts `MHI2_*_AUG22_K3346` and `MHI2_*_AUG22_K3347` only
+  (from `CachedTrain.txt` or the EEPROM) and stops, changing nothing, on anything else.
 - **HMI jars** (`dpad_hook.jar`, `coverart_hook.jar`, `rgd_hook.jar`): rebuilt against the
   K3346 HMI.
 - **`libcarplay_hook.so`**: patched for the K3346 CarPlay library: the cluster stream's
@@ -47,6 +47,10 @@ What it adds on AUG22 K3346:
 
 Tested on `MHI2_ER_AUG22_K3346`, MU1438, with the Virtual Cockpit and the HARMAN iAP2
 stack. Remove any other CarPlay or HMI mod first; the installer stops if it finds one.
+
+- **`MHI2_US_AUG22_K3347`** (NAR) runs the same HMI release with byte-identical CarPlay
+  natives; only 12 unrelated HMI classes differ. A user confirmed it on the car (cover
+  art, route guidance, the CarPlay map in the cluster).
 
 - **CarPlay map in the cluster** works by cable and through a wireless adapter that
   passes the cluster stream:
