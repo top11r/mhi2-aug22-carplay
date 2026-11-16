@@ -1,7 +1,7 @@
 # MHI2 AUG22 CarPlay patches (K3346)
 
 A private build for Audi MHI2 head units on **`MHI2_ER_AUG22_K3346`** (MU1438), based on
-**[chefranov's CarPlay patches](https://github.com/chefranov/mhi2-au37x-carplay)** (v1.1.11).
+**[chefranov's CarPlay patches](https://github.com/chefranov/mhi2-au37x-carplay)** (v1.1.13).
 His installer, jars and native parts do all the work; this build ports them to the
 AUG22 K3346 firmware and keeps only what was tested there. The modifications are made
 **with chefranov's permission**.
@@ -15,6 +15,8 @@ What it adds on AUG22 K3346:
   the head unit's video hardware. Zoom with the left steering-wheel roller.
 - **Route guidance**: CarPlay turn-by-turn maneuvers in the cluster's maneuver tile:
   the arrow, the distance, the street and lane guidance, drawn live.
+- **Maneuver arrow** fills blue as the turn gets closer. For the plain arrow:
+  `touch /mnt/app/rgd_no_arrow_fill` and reboot.
 - **Cover art**: CarPlay album artwork on the cluster's now-playing widget.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
 
@@ -40,7 +42,6 @@ What it adds on AUG22 K3346:
 - **`rgd_hook.jar`** also fixes the update of the cockpit's own maneuver tile, which failed
   in every K3346 build.
 - **No parking popup**: not ported to this HMI.
-- **`altscreen_sup.sh`** does not remount `/mnt/app` writable.
 - **Cluster-map intro**: shows "CarPlay Navigation" and "Loading…".
 
 ## Compatibility
@@ -76,7 +77,8 @@ The card has a single folder, `mod`: `mod/custom.sh`, `mod/command.sh`,
 2. Insert the card, then in M.I.B. run `Advanced Settings → Run Custom Script`
    (`Advanced Settings → Run individual script` on M.I.B. V3.6 and later).
 3. Read the log on screen (it is also in `/tmp/carplay_install.log`), then **restart
-   the MMI**.
+   the MMI**. If the installer stopped, the unit is unchanged; the log says why and a
+   copy is on the card as `mod/carplay/last_run.log`.
 
 **Over a network cable:** from the folder that contains `mod`:
 
@@ -98,11 +100,15 @@ Running the installer again upgrades in place.
 | force the sport cluster layout | `SPORT=1 sh install.sh` | `SPORT` |
 | let unknown jars through | `IGNORE_CONFLICTS=1 sh install.sh` | `IGNORE_CONFLICTS` |
 
+`SPORT`, `ETA_DEFAULT` and `MAP_ONLY` stay set across later installs. To switch one back
+off: `SPORT=0`, `ETA_DEFAULT=0` or `MAP_ONLY=0` by cable, or an empty `NO_SPORT`,
+`NO_ETA_DEFAULT` or `NO_MAP_ONLY` file on the card.
+
 ## Using it
 
 - **Cluster map**: comes up with the phone, after a short intro. A **long press of the
-  left steering-wheel roller** swaps between the CarPlay map and the stock one; as
-  `/mnt/app` stays read-only, the choice is not kept across ignition.
+  left steering-wheel roller** swaps between the CarPlay map and the stock one; the
+  choice is kept.
 - **Route guidance**: start a route on the phone. While the car is off the road network
   (parked, before joining the route) the maneuver tile stays closed; it opens with the
   first turn. A **short press of the left roller** swaps the line under the maneuver

@@ -24,6 +24,11 @@ jobs:
             unzip -Z1 bin/rgd_hook.jar | grep -qx "$e" || { echo "bin/rgd_hook.jar: missing $e"; exit 1; }
           done
 
+      - name: Check the scripts parse
+        run: |
+          set -eu
+          for f in install.sh uninstall.sh custom.sh command.sh bin/altscreen_sup.sh; do sh -n "$f"; done
+
       - name: Build the SD card archives
         run: |
           set -eu
