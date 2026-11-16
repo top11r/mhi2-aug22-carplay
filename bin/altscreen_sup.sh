@@ -2,8 +2,7 @@
 # K3346 stage 3b: keeps one altscreen_render --listen alive while the cluster
 # map is switched on (/mnt/app/altscreen_inject). Started in the background by
 # the mm-ipod shim, i.e. with the CarPlay session. Private copy of chefranov's
-# altscreen_sup.sh without its `mount -uw /mnt/app`: /mnt/app stays read-only,
-# so the steering-wheel on/off choice is not saved across sessions.
+# altscreen_sup.sh (K3346 library path).
 BIN=/mnt/app/eso/hmi/lib/altscreen_render
 LOG=/dev/null
 LOCK=/dev/shmem/altscreen_sup.pid
@@ -24,6 +23,12 @@ if [ -f "$LOCK" ]; then
 fi
 echo $$ > "$LOCK"
 
+# /mnt/app is read-only after every boot, and then the steering-wheel on/off
+# choice cannot be saved.  Open it for the session; mount -uw on an already
+# writable mount is harmless.
+mount -uw /mnt/app 2>/dev/null
+
+quick=0
 while [ -f "$MARKER" ]; do
     "$BIN" --listen >> "$LOG" 2>&1
     rc=$?
@@ -31,6 +36,15 @@ while [ -f "$MARKER" ]; do
     # window is gone.
     rm -f "$FLAG"
     # 0 is a planned restart (one hardware decoder per process); a crash waits.
-    [ "$rc" -eq 0 ] || sleep 2
+    # A renderer that exits 0 straight away, over and over, would spin a core:
+    # there is no clock here to time an exit with, so every twentieth planned
+    # restart in a row waits as well.
+    if [ "$rc" -eq 0 ]; then
+        quick=$((quick + 1))
+        [ "$quick" -lt 20 ] || { quick=0; sleep 2; }
+    else
+        quick=0
+        sleep 2
+    fi
 done
 rm -f "$LOCK"

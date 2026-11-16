@@ -4,6 +4,39 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## k3346-v1.0.4 — 2026-11-16
+
+Based on chefranov's v1.1.13 (was v1.1.11), with every K3346 change carried over.
+
+- **Route guidance: the first maneuver shows straight away** when CarPlay connects to
+  a route that is already running, after switching navigation apps and after a
+  reroute. A route that resumes right after a short stop no longer ends by itself,
+  and a passed turn's distance is no longer shown for the next turn.
+- **Route guidance: roundabouts and ramps follow the car's traffic side** when the
+  navigation app doesn't send one (right-hand-drive cars got right-hand traffic).
+- **Maneuver arrow fills blue as the turn gets closer.** For the plain arrow:
+  `touch /mnt/app/rgd_no_arrow_fill` and reboot. In the sport layout the progress
+  bar starts below the cluster's line.
+- **CarPlay no longer drops when the HMI closes the route guidance connection**, and
+  the cluster keeps following CarPlay after an internal error instead of stopping
+  until the next reboot. Waits around route start, route end and reconnecting no
+  longer follow the head unit's clock, which jumps when the time is synchronised.
+- **CarPlay map in the cluster: the stream ends cleanly with its session** and comes
+  back on the next connection.
+- **Smaller fixes:** stock navigation gets its own route state back after a CarPlay
+  route in one more case; oversized cover art is refused; street names cut at the
+  length limit no longer end in half a character; fewer drawing calls for lanes and
+  the progress bar.
+- **Installer:** nothing is written before every check has passed, and a stopped
+  install says so and leaves its log on the card (`mod/carplay/last_run.log`); jars
+  and the config are replaced in one step; the config backup follows firmware
+  updates; a new stock `mm-ipod` after a firmware update is kept; the route guidance
+  hook is loaded into `mm-ipod` only, not into the cluster renderers; `NO_SPORT`,
+  `NO_ETA_DEFAULT` and `NO_MAP_ONLY` on the card switch those options back off.
+- **CarPlay map in the cluster: the long press of the left roller works again** and
+  its choice is kept. The cluster map's supervisor makes `/mnt/app` writable for the
+  session again, as in chefranov's release; this build had left it read-only.
+
 ## k3346-v1.0.3 — 2026-11-15
 
 - **Route guidance: the cockpit's navigation tab no longer keeps the car's own
