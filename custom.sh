@@ -14,20 +14,17 @@
 # create an empty file named UNINSTALL next to install.sh on the card
 # (/mod/carplay/UNINSTALL) and run the custom script again.
 #
-# To force route guidance onto the sport cluster layout (normally detected by
-# itself), put an empty file named SPORT next to install.sh - see README,
-# "The sport cluster layout".
+# Settings (sport layout, arrival time first, map for wireless adapters, ...)
+# are changed in the car: MENU > Audi smartphone interface > CarPlay settings.
 # To install everything except route guidance, put an empty file named NO_RGI
 # on the card beside install.sh; to leave out only the CarPlay map in the
-# cluster, one named NO_ALTSCREEN.  An empty WIRELESS_MAP file offers the
-# cluster map to a wireless adapter that does not ask for it (see the wiki,
-# Compatibility).  An empty PDC file installs the parking popup beside CarPlay
+# cluster, one named NO_ALTSCREEN.  An empty NO_DPAD file leaves out the
+# touchpad as arrow keys, an empty NO_COVERART file the album art in the
+# virtual cockpit.  An empty PDC file installs the parking popup beside CarPlay
 # (P5089 and Q2 P5088 only).  If the installer stops on jars it does not
 # know and you are sure they are harmless, an empty IGNORE_CONFLICTS file lets
 # it go on.  There is no way to pass an environment variable through the
 # M.I.B. menu, and the files combine.
-# SPORT, ETA_DEFAULT and MAP_ONLY stay as they were set until told otherwise:
-# an empty NO_SPORT, NO_ETA_DEFAULT or NO_MAP_ONLY file switches one back off.
 
 set -u
 
@@ -77,43 +74,24 @@ if [ -f "$PAYLOAD/UNINSTALL" ]; then
     RUN_LOG=/tmp/carplay_uninstall.log
 else
     R=1
-    S=
     A=1
     if [ -f "$PAYLOAD/NO_RGI" ]; then
         echo "NO_RGI marker present - installing without route guidance"
         R=0
     fi
-    if [ -f "$PAYLOAD/SPORT" ]; then
-        echo "SPORT marker present - forcing the sport cluster layout for route guidance"
-        S=1
-    elif [ -f "$PAYLOAD/NO_SPORT" ]; then
-        echo "NO_SPORT marker present - the cluster layout is detected again"
-        S=0
-    fi
     if [ -f "$PAYLOAD/NO_ALTSCREEN" ]; then
         echo "NO_ALTSCREEN marker present - installing without the CarPlay map in the cluster"
         A=0
     fi
-    E=
-    if [ -f "$PAYLOAD/ETA_DEFAULT" ]; then
-        echo "ETA_DEFAULT marker present - the line under the maneuver starts on the arrival time"
-        E=1
-    elif [ -f "$PAYLOAD/NO_ETA_DEFAULT" ]; then
-        echo "NO_ETA_DEFAULT marker present - the line under the maneuver starts on the next street"
-        E=0
+    D=1
+    if [ -f "$PAYLOAD/NO_DPAD" ]; then
+        echo "NO_DPAD marker present - installing without the touchpad as arrow keys"
+        D=0
     fi
-    M=
-    if [ -f "$PAYLOAD/MAP_ONLY" ]; then
-        echo "MAP_ONLY marker present - the cluster map without route guidance"
-        M=1
-    elif [ -f "$PAYLOAD/NO_MAP_ONLY" ]; then
-        echo "NO_MAP_ONLY marker present - route guidance in the cluster again"
-        M=0
-    fi
-    W=0
-    if [ -f "$PAYLOAD/WIRELESS_MAP" ]; then
-        echo "WIRELESS_MAP marker present - offering the cluster map to wireless adapters"
-        W=1
+    C=1
+    if [ -f "$PAYLOAD/NO_COVERART" ]; then
+        echo "NO_COVERART marker present - installing without the album art in the virtual cockpit"
+        C=0
     fi
     P=0
     if [ -f "$PAYLOAD/PDC" ]; then
@@ -125,7 +103,7 @@ else
         echo "IGNORE_CONFLICTS marker present - unknown jars will not stop the install"
         I=1
     fi
-    SRC_DIR="$PAYLOAD" RGI=$R SPORT=$S ETA_DEFAULT=$E MAP_ONLY=$M ALTSCREEN=$A WIRELESS_MAP=$W PDC=$P IGNORE_CONFLICTS=$I \
+    SRC_DIR="$PAYLOAD" RGI=$R ALTSCREEN=$A DPAD=$D COVERART=$C PDC=$P IGNORE_CONFLICTS=$I \
         sh "$PAYLOAD/install.sh"
     RC=$?
     RUN_LOG=/tmp/carplay_install.log

@@ -1,0 +1,19 @@
+{
+  "entry_row": "Switch to CarPlay settings",
+  "screen.main": "CarPlay settings",
+  "screen.route_guidance": "Route guidance",
+  "screen.cockpit_map": "Virtual cockpit map",
+  "restart": "Restart CarPlay",
+  "note.mmi_restart": "Takes effect after the MMI restarts.",
+  "rgd_disable": "CarPlay in virtual cockpit",
+  "rgd_map_only": "Directions in virtual cockpit",
+  "rgd_sport": "Force sport view layout",
+  "rgd_sport.hint": "Only if the map ignores the sport view.",
+  "rgd_eta_default": "Show arrival time first",
+  "rgd_no_arrow_fill": "Fill arrow as the turn gets closer",
+  "rgd_cancel_native": "End MMI route when CarPlay navigates",
+  "altscreen_cluster_off": "CarPlay map in virtual cockpit",
+  "altscreen_force": "Offer map to wireless adapters",
+  "note.restarted": "CarPlay restarted. Plug in the iPhone again.",
+  "note.not_saved": "The setting could not be saved."
+}

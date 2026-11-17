@@ -17,9 +17,13 @@ jobs:
 
       # rgd_hook.jar must carry its non-class resources: VCTextData reads
       # vc-text.bin on first use (VC street scroll) and throws without it.
+      # mmi_settings.jar is built from src/mmi_settings against a stock lsd.jar
+      # CI does not have, so it is committed; the installer stops without it.
       - name: Check the jar resources
         run: |
           set -eu
+          unzip -Z1 bin/mmi_settings.jar | grep -qx de/audi/tghu/terminalmode/hmi/Activator.class \
+            || { echo "bin/mmi_settings.jar missing or incomplete"; exit 1; }
           for e in com/mhi2/carplay/rgd/vc-text.bin META-INF/UNICODE-LICENSE.txt; do
             unzip -Z1 bin/rgd_hook.jar | grep -qx "$e" || { echo "bin/rgd_hook.jar: missing $e"; exit 1; }
           done

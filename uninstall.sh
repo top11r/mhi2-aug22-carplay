@@ -164,7 +164,8 @@ rm -f /mnt/app/rgd_disable /mnt/app/rgd_cluster_ctx /mnt/app/rgd_rgtype \
       /mnt/app/rgd_eta_default /mnt/app/rgd_map_only "$LIB_DIR/.rgd_render_hold_set" \
       /mnt/app/rgd_no_arrow_fill /mnt/app/rgd_rearm /mnt/app/rgd_maps30 /mnt/app/pdc_log \
       /mnt/app/rgd_hook.log.prev /mnt/app/carplay_hook.log \
-      /mnt/app/.mhi2_trace /mnt/app/.mhi2_trace_keep /mnt/app/.mhi2_trace_all 2>/dev/null
+      /mnt/app/.mhi2_trace /mnt/app/.mhi2_trace_keep /mnt/app/.mhi2_trace_all \
+      /mnt/app/mmi_settings_defaults 2>/dev/null
 
 # The CarPlay map in the cluster: its renderer, supervisor, shaders, its on
 # switch and the steering-wheel choice.
@@ -182,7 +183,7 @@ rm -f /mnt/app/altscreen_inject /mnt/app/altscreen_force /mnt/app/altscreen_clus
 
 say ""
 say "--- removing files ---"
-for f in "$JARS_DIR/coverart_hook.jar" "$JARS_DIR/dpad_hook.jar" "$JARS_DIR/pdc_hook.jar" \
+for f in "$JARS_DIR/coverart_hook.jar" "$JARS_DIR/dpad_hook.jar" "$JARS_DIR/mmi_settings.jar" "$JARS_DIR/pdc_hook.jar" \
          /mnt/app/eso/hmi/lsd/images/HMIEarlyAppsEvoHighScale/2199999.png "$SO_DEST"; do
     if [ -f "$f" ]; then
         rm -f "$f" && say "removed: $f" || say "!! could not remove $f"
