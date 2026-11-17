@@ -15,8 +15,8 @@ What it adds on AUG22 K3346:
   the head unit's video hardware. Zoom with the left steering-wheel roller.
 - **Route guidance**: CarPlay turn-by-turn maneuvers in the cluster's maneuver tile:
   the arrow, the distance, the street and lane guidance, drawn live.
-- **Maneuver arrow** fills blue as the turn gets closer. For the plain arrow:
-  `touch /mnt/app/rgd_no_arrow_fill` and reboot.
+- **Maneuver arrow** fills blue as the turn gets closer. For the plain arrow: untick
+  **Fill arrow as the turn gets closer** in the settings and restart the MMI.
 - **Cover art**: CarPlay album artwork on the cluster's now-playing widget.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
 
@@ -94,15 +94,30 @@ Running the installer again upgrades in place.
 |---|---|---|
 | leave out route guidance and the cluster map | `RGI=0 sh install.sh` | `NO_RGI` |
 | leave out only the cluster map | `ALTSCREEN=0 sh install.sh` | `NO_ALTSCREEN` |
-| offer the cluster map to a wireless adapter that does not ask for it | `WIRELESS_MAP=1 sh install.sh` | `WIRELESS_MAP` |
-| start the line under the maneuver on the arrival time | `ETA_DEFAULT=1 sh install.sh` | `ETA_DEFAULT` |
-| the cluster map without route guidance (no maneuver tile) | `MAP_ONLY=1 sh install.sh` | `MAP_ONLY` |
-| force the sport cluster layout | `SPORT=1 sh install.sh` | `SPORT` |
+| leave out the touchpad as arrow keys | `DPAD=0 sh install.sh` | `NO_DPAD` |
+| leave out the album art in the virtual cockpit | `COVERART=0 sh install.sh` | `NO_COVERART` |
 | let unknown jars through | `IGNORE_CONFLICTS=1 sh install.sh` | `IGNORE_CONFLICTS` |
 
-`SPORT`, `ETA_DEFAULT` and `MAP_ONLY` stay set across later installs. To switch one back
-off: `SPORT=0`, `ETA_DEFAULT=0` or `MAP_ONLY=0` by cable, or an empty `NO_SPORT`,
-`NO_ETA_DEFAULT` or `NO_MAP_ONLY` file on the card.
+## Settings
+
+Settings are changed in the car, not by the installer: **MENU → Audi smartphone
+interface → Switch to CarPlay settings**, with no phone connected.
+
+| Row | Default | Takes effect |
+|---|---|---|
+| CarPlay in virtual cockpit (off: no maneuvers and no CarPlay map in the cockpit) | on | after an MMI restart |
+| Route guidance › Directions in virtual cockpit (off: the CarPlay map without maneuvers) | on | next phone plug |
+| Route guidance › Force sport view layout (only if the map ignores the sport view) | off (follow the cluster) | within 5 s |
+| Route guidance › Show arrival time first | off | within 5 s |
+| Route guidance › Fill arrow as the turn gets closer | on | after an MMI restart |
+| Route guidance › End MMI route when CarPlay navigates | on | next phone plug |
+| Virtual cockpit map › CarPlay map in virtual cockpit | on | within 1 s (also the roller long press) |
+| Virtual cockpit map › Offer map to wireless adapters | off | next phone plug |
+| Restart CarPlay | – | restarts the CarPlay services; plug the iPhone in again |
+
+The first install of this version sets these defaults; later installs keep what was
+chosen in the car. The installer options `SPORT`, `ETA_DEFAULT`, `MAP_ONLY` and
+`WIRELESS_MAP` (and their files on the card) are gone: set them once in the menu.
 
 ## Using it
 
@@ -112,9 +127,12 @@ off: `SPORT=0`, `ETA_DEFAULT=0` or `MAP_ONLY=0` by cable, or an empty `NO_SPORT`
 - **Route guidance**: start a route on the phone. While the car is off the road network
   (parked, before joining the route) the maneuver tile stays closed; it opens with the
   first turn. A **short press of the left roller** swaps the line under the maneuver
-  between the next street and the arrival time. Off without uninstalling:
-  `touch /mnt/app/rgd_disable` and restart the MMI; delete the file to turn it back on.
-- **Sport layout** is detected by itself; `touch /mnt/app/rgd_sport` forces it.
+  between the next street and the arrival time. Off without uninstalling: untick
+  **CarPlay in virtual cockpit** in the settings and restart the MMI.
+- **Sport layout** is detected by itself; **Force sport view layout** forces it if that ever fails.
+- **CarPlay doesn't come back after a reconnect**: **Restart CarPlay** in the settings,
+  then plug the iPhone in again. If it still doesn't start, restart the MMI
+  ([#79](https://github.com/chefranov/mhi2-au37x-carplay/issues/79)).
 
 Known behaviour of the stock USB stack: after unplugging, the head unit sometimes misses
 the removal, and CarPlay stays on screen until its 30-second watchdog ends the session;
@@ -139,3 +157,12 @@ then restart the MMI.
   lane guidance), [Mich795](https://github.com/Mich795) (cover-art fixes) and
   [aberbic](https://github.com/aberbic/Audi-MHI2-Virtual-Cockpit-Altscreen-CarPlay-AndroidAuto)
   (the hardware-decoder layer setup for the cluster map).
+
+## Licence
+
+Everything in this repository is under chefranov's [LICENSE](LICENSE), except
+[`src/mmi_settings`](src/mmi_settings) (the CarPlay settings menu, `bin/mmi_settings.jar`):
+that is top11r's own code under GPL-3.0-or-later, with an additional permission to
+combine it with the head unit's own HMI classes (see
+[`src/mmi_settings/LICENSE`](src/mmi_settings/LICENSE)). It is built from that directory
+with `src/mmi_settings/build.sh` and a stock `lsd.jar` converted from your own unit.

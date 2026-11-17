@@ -22,7 +22,8 @@
 #      M.I.B.'s NavActiveIgnore jar is switched off, uninstall puts it back.
 #   1. Remounts /mnt/app and /mnt/system read-write.
 #   2. Backs up every file it is going to change, once, as <file>.orig.
-#   3. Copies the jars into the HMI's jar directory (D-pad, cover art, and, on
+#   3. Copies the jars into the HMI's jar directory (D-pad and cover art unless
+#      left out with DPAD=0 / COVERART=0, the CarPlay settings menu, and, on
 #      firmware it was checked against, the parking-sensor popup beside CarPlay)
 #      and the native hooks into /mnt/app/eso/hmi/lib.
 #   4. Adds LD_PRELOAD for the cover-art hook to the carplay child in
@@ -38,7 +39,9 @@
 #   8. Undoes a part left out this time (RGI=0, ALTSCREEN=0) that an earlier
 #      install put there, and drops files earlier releases used and this one
 #      does not.
-#   9. Tells you to reboot.
+#   9. On the first install of this version, sets the settings to their
+#      defaults; after that only the CarPlay settings menu changes them.
+#  10. Tells you to reboot.
 #
 # Everything is idempotent: running it twice changes nothing the second time.
 # POSIX sh only - no bashisms, and none of sed, awk or dirname: the unit
@@ -78,11 +81,6 @@ ALT_SUP=$LIB_DIR/altscreen_sup.sh
 ALT_SHADER_DIR=$LIB_DIR/altscreen_shaders
 ALT_SHADERS="main.vert video.frag intro.frag"
 ALT_ON=/mnt/app/altscreen_inject
-# Offer the cluster screen to a wireless adapter that does not ask for it (the
-# Carlinkit 2Air, #25).  Opt-in: an adapter that cannot handle a second screen
-# may take it for its main one.  WIRELESS_MAP=1 (an empty WIRELESS_MAP file on
-# the card) switches it on; every other install switches it off again.
-WIRELESS_MAP=${WIRELESS_MAP:-0}
 ALT_FORCE=/mnt/app/altscreen_force
 
 # The parking-sensor popup beside CarPlay replaces seven stock HMI classes, and
@@ -94,19 +92,20 @@ ALT_FORCE=/mnt/app/altscreen_force
 # removed.
 PDC=${PDC:-0}
 
-# Force the sport cluster layout (1) or the classic one (0). Unset means "leave
-# whatever is already there", which is what an upgrade wants.
-SPORT=${SPORT:-}
+# The touchpad as arrow keys in CarPlay (dpad_hook.jar) and the album art in the
+# virtual cockpit (coverart_hook.jar) are on unless left out: DPAD=0 / COVERART=0
+# (an empty NO_DPAD / NO_COVERART file on the card).  Left out, an earlier copy
+# is removed and the HMI behaves as stock there.  libcarplay_hook.so stays
+# either way: the cockpit map and route guidance use it too.
+DPAD=${DPAD:-1}
+COVERART=${COVERART:-1}
 
-# Start the line under the maneuver on the arrival time (1) or on the next
-# street (0); a short press of the left roller swaps them either way.  Unset
-# leaves what is there, as with SPORT.
-ETA_DEFAULT=${ETA_DEFAULT:-}
-
-# Keep the CarPlay map in the cluster but leave route guidance to the phone's
-# own screen (1): no maneuver tile, no takeover of the cluster's route fields
-# (#22, #38).  Unset leaves what is there, as with SPORT.
-MAP_ONLY=${MAP_ONLY:-}
+# Settings (sport view, arrival time first, directions in the virtual cockpit,
+# map for wireless adapters, ...) are not install options: the first install of
+# this version sets the defaults, then only MENU > Audi smartphone interface >
+# CarPlay settings changes them (mmi_settings.jar).  This file says the
+# defaults were set; while it is there, installs leave the setting flags alone.
+SETTINGS_STAMP=/mnt/app/mmi_settings_defaults
 
 # No `dirname` either - see the note in custom.sh.  ${0%/*} strips the last
 # /component, but leaves $0 untouched when it has no slash at all, so the
@@ -234,9 +233,11 @@ esac
 
 # ---------------------------------------------------------------- payload
 say "payload: $BIN_DIR"
-for f in coverart_hook.jar dpad_hook.jar libcarplay_hook.so; do
+for f in libcarplay_hook.so mmi_settings.jar; do
     [ -f "$BIN_DIR/$f" ] || die "missing payload file: $BIN_DIR/$f"
 done
+[ "$DPAD" = "0" ] || [ -f "$BIN_DIR/dpad_hook.jar" ] || die "missing payload file: $BIN_DIR/dpad_hook.jar (or set DPAD=0)"
+[ "$COVERART" = "0" ] || [ -f "$BIN_DIR/coverart_hook.jar" ] || die "missing payload file: $BIN_DIR/coverart_hook.jar (or set COVERART=0)"
 
 if [ "$RGI" != "0" ]; then
     for f in rgd_hook.jar librgd_hook.so; do
@@ -390,7 +391,7 @@ for j in "$JARS_DIR"/*.jar "$JARS_DIR"/*.zip; do
         lang_data.zip|locale.zip|xEventRecorder.jar|xEventRecorderEvo.jar|\
         xTcpKeyPanel.jar|xTcpLog.jar)
             ;;  # stock
-        dpad_hook.jar|coverart_hook.jar|rgd_hook.jar|pdc_hook.jar|vehdata_hook.jar)
+        dpad_hook.jar|coverart_hook.jar|rgd_hook.jar|pdc_hook.jar|vehdata_hook.jar|mmi_settings.jar)
             ;;  # this project
         NavActiveIgnore.jar|navignore_audi.jar|navignore_vw.jar)
             NAVIGNORE="$NAVIGNORE $n" ;;
@@ -410,6 +411,12 @@ if [ -n "$UNKNOWN" ]; then
     for n in $UNKNOWN; do say "!!   $n"; done
     if [ "$IGNORE_CONFLICTS" = "1" ]; then
         say "!! IGNORE_CONFLICTS is set - going on anyway."
+        # mmi_settings.jar replaces the start-up classes of the Audi smartphone
+        # interface; a jar that replaces them too (the unit cannot look inside a
+        # jar: no unzip, grep skips binaries) wins or loses by name order, and
+        # one of the two then does nothing.
+        say "!! If one of them changes the Audi smartphone interface, either it or"
+        say "!! the CarPlay settings menu will not work."
     else
         say "!!   If they are another HMI or CarPlay mod, uninstall it first."
         say "!!   If you know they are harmless, run again with IGNORE_CONFLICTS=1"
@@ -535,8 +542,23 @@ say "--- copying files ---"
 
 # Modes are set explicitly: on the M.I.B. path the source is a FAT32 card,
 # which carries no Unix modes, and lsd skips an unreadable jar without a word.
-put_file "$BIN_DIR/dpad_hook.jar" "$JARS_DIR/dpad_hook.jar" 755 || die "copy dpad_hook.jar failed"
-put_file "$BIN_DIR/coverart_hook.jar" "$JARS_DIR/coverart_hook.jar" 755 || die "copy coverart_hook.jar failed"
+# The D-pad and the cover art: installed, or (DPAD=0 / COVERART=0) taken away.
+for pair in "dpad_hook.jar:$DPAD:touchpad as arrow keys" "coverart_hook.jar:$COVERART:album art in the virtual cockpit"; do
+    jar=${pair%%:*}; rest=${pair#*:}; on=${rest%%:*}; what=${rest#*:}
+    if [ "$on" = "0" ]; then
+        if [ -f "$JARS_DIR/$jar" ]; then
+            rm -f "$JARS_DIR/$jar" && say "removed: $JARS_DIR/$jar ($what left out)" \
+                || say "!! could not remove $JARS_DIR/$jar"
+        else
+            say "left out: $what"
+        fi
+    else
+        put_file "$BIN_DIR/$jar" "$JARS_DIR/$jar" 755 || die "copy $jar failed"
+        chmod 755 "$JARS_DIR/$jar"
+        say "ok: $JARS_DIR/$jar"
+    fi
+done
+put_file "$BIN_DIR/mmi_settings.jar" "$JARS_DIR/mmi_settings.jar" 755 || die "copy mmi_settings.jar failed"
 
 # The hook goes in via rename, not a plain cp over the top. On an upgrade
 # dio_manager may be running right now with the old .so mapped, and writing
@@ -552,10 +574,7 @@ mv "$SO_DEST.new" "$SO_DEST" || die "could not put libcarplay_hook.so in place"
 # card, which carries no Unix modes at all. Every stock file in the jars
 # directory is world-readable (-rwxrwxrwx root:root), so an unreadable jar
 # would simply be skipped by lsd with no error anywhere.
-chmod 755 "$JARS_DIR/dpad_hook.jar" "$JARS_DIR/coverart_hook.jar" "$SO_DEST"
-
-say "ok: $JARS_DIR/dpad_hook.jar"
-say "ok: $JARS_DIR/coverart_hook.jar"
+chmod 755 "$SO_DEST"
 # The sensors popup's background without the black strip under its frame,
 # used only over CarPlay. Only the 800-px HMI has it (AU37x); elsewhere the
 # directory is missing and the stock background stays.
@@ -694,12 +713,6 @@ if [ "$RGI" != "0" ]; then
     fi
     touch /mnt/app/rgd_no_tel || die "could not create /mnt/app/rgd_no_tel"
     say "ok: no phone tab in this build (/mnt/app/rgd_no_tel)"
-    # The car's own navigation can hold a route of its own (one it resumes after
-    # a restart, or picks up when the phone is already navigating at connect) and
-    # then takes the cluster. With this marker the jar cancels that route when
-    # CarPlay route guidance takes over (chefranov's switch, off in his release).
-    touch /mnt/app/rgd_cancel_native || die "could not create /mnt/app/rgd_cancel_native"
-    say "ok: the car's own route is cancelled when CarPlay route guidance starts (/mnt/app/rgd_cancel_native)"
 
     # The supervisor keeps exactly one renderer alive. Started by the shim
     # below, so it comes up with the CarPlay session and goes with the ignition.
@@ -744,40 +757,6 @@ SUP
     chmod 755 "$SUPERVISOR.new"
     mv "$SUPERVISOR.new" "$SUPERVISOR" || die "could not install $SUPERVISOR"
     say "ok: $SUPERVISOR"
-
-    # The layout is normally read from the head unit itself (the cluster's
-    # menu reaches it as a skin).  The marker forces the sport layout on a unit
-    # where that does not follow; it can be changed any time without a reboot
-    # (picked up within 5 s), and removing it hands control back.
-    if [ "$SPORT" = "1" ]; then
-        touch /mnt/app/rgd_sport || die "could not create /mnt/app/rgd_sport"
-        say "ok: sport cluster layout selected (/mnt/app/rgd_sport)"
-    elif [ "$SPORT" = "0" ]; then
-        rm -f /mnt/app/rgd_sport
-        say "ok: classic cluster layout selected"
-    elif [ -f /mnt/app/rgd_sport ]; then
-        say "keeping the sport cluster layout (/mnt/app/rgd_sport is present)"
-    fi
-
-    if [ "$ETA_DEFAULT" = "1" ]; then
-        touch /mnt/app/rgd_eta_default || die "could not create /mnt/app/rgd_eta_default"
-        say "ok: the line under the maneuver starts on the arrival time (/mnt/app/rgd_eta_default)"
-    elif [ "$ETA_DEFAULT" = "0" ]; then
-        rm -f /mnt/app/rgd_eta_default
-        say "ok: the line under the maneuver starts on the next street"
-    elif [ -f /mnt/app/rgd_eta_default ]; then
-        say "keeping the arrival time first (/mnt/app/rgd_eta_default is present)"
-    fi
-
-    if [ "$MAP_ONLY" = "1" ]; then
-        touch /mnt/app/rgd_map_only || die "could not create /mnt/app/rgd_map_only"
-        say "ok: cluster map only, route guidance stays on the phone (/mnt/app/rgd_map_only)"
-    elif [ "$MAP_ONLY" = "0" ]; then
-        rm -f /mnt/app/rgd_map_only
-        say "ok: route guidance in the cluster"
-    elif [ -f /mnt/app/rgd_map_only ]; then
-        say "keeping the cluster map without route guidance (/mnt/app/rgd_map_only is present)"
-    fi
 
     # The shim.  mm-ipod is started by usblauncher out of a config on flash,
     # which we do not touch; instead the binary on /mnt/app is replaced by a
@@ -851,12 +830,6 @@ if [ "$ALTSCREEN" != "0" ]; then
 
     touch "$ALT_ON" || die "could not create $ALT_ON"
     say "ok: switched on"
-    if [ "$WIRELESS_MAP" = "1" ]; then
-        touch "$ALT_FORCE" || die "could not create $ALT_FORCE"
-        say "ok: offered to wireless adapters too (WIRELESS_MAP)"
-    else
-        rm -f "$ALT_FORCE"
-    fi
 else
     # Left out on purpose (ALTSCREEN=0, or RGI=0 which it rides on): take away
     # whatever an earlier install put there, so nothing of it keeps running.
@@ -873,6 +846,22 @@ else
 fi
 
 # ---------------------------------------------------------------- RGI=0
+# Settings: defaults once, then the car's choices stay (see SETTINGS_STAMP).
+# rgd_cancel_native: the car's own navigation can hold a route of its own (one
+# it resumes after a restart, or picks up when the phone is already navigating
+# at connect) and then takes the cluster; with this flag the jar cancels that
+# route when CarPlay route guidance takes over - on by default.
+say ""
+if [ -f "$SETTINGS_STAMP" ]; then
+    say "keeping the settings chosen in the car ($SETTINGS_STAMP is present)"
+else
+    rm -f /mnt/app/rgd_disable /mnt/app/rgd_map_only /mnt/app/rgd_sport /mnt/app/rgd_eta_default /mnt/app/rgd_no_arrow_fill \
+          /mnt/app/altscreen_cluster_off "$ALT_FORCE"
+    touch /mnt/app/rgd_cancel_native || die "could not create /mnt/app/rgd_cancel_native"
+    touch "$SETTINGS_STAMP" || die "could not create $SETTINGS_STAMP"
+    say "ok: settings set to their defaults; change them in MENU > Audi smartphone interface > CarPlay settings"
+fi
+
 # Route guidance left out of an install that had it: undo it the way
 # uninstall.sh does - the shim first, so that mm-ipod starts stock even if
 # anything after it fails - instead of leaving the old version running beside
@@ -929,7 +918,9 @@ rm -f /mnt/app/carplay_verbose /mnt/app/carplay_log_persist \
 # ---------------------------------------------------------------- done
 say ""
 say "--- installed files ---"
-ls -l "$JARS_DIR/dpad_hook.jar" "$JARS_DIR/coverart_hook.jar" "$SO_DEST" 2>&1 | while IFS= read -r l; do say "$l"; done
+ls -l "$SO_DEST" 2>&1 | while IFS= read -r l; do say "$l"; done
+[ "$DPAD" = "0" ] || ls -l "$JARS_DIR/dpad_hook.jar" 2>&1 | while IFS= read -r l; do say "$l"; done
+[ "$COVERART" = "0" ] || ls -l "$JARS_DIR/coverart_hook.jar" 2>&1 | while IFS= read -r l; do say "$l"; done
 [ "$PDC" = "1" ] && ls -l "$JARS_DIR/pdc_hook.jar" 2>&1 | while IFS= read -r l; do say "$l"; done
 if [ "$RGI" != "0" ]; then
     ls -l "$RGD_JAR" "$RGD_SO" "$RENDER" "$ATLAS" "$BLANK" "$SUPERVISOR" "$SBIN/mm-ipod" 2>&1 \
@@ -955,11 +946,9 @@ if [ "$RGI" != "0" ]; then
     say ""
     say "Route guidance is installed and on.  Start a route in Apple Maps or"
     say "Google Maps on the phone and the maneuver appears in the cluster."
-    say "To turn it off later, without uninstalling anything:"
-    say "  touch /mnt/app/rgd_disable   (then reboot)"
-    say "force the sport cluster layout / back to automatic, no reboot needed:"
-    say "  touch /mnt/app/rgd_sport  /  rm /mnt/app/rgd_sport"
-    say "and to turn it back on, delete that file and reboot."
+    say "Its settings are in MENU > Audi smartphone interface > Switch to CarPlay"
+    say "settings (with no phone connected); untick 'CarPlay in virtual cockpit'"
+    say "there to switch it off."
 fi
 if [ "$ALTSCREEN" != "0" ]; then
     say ""

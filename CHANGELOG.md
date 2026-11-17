@@ -4,6 +4,27 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## k3346-v1.1.0 — 2026-11-17
+
+The CarPlay settings menu; based on k3346-v1.0.4 (chefranov's v1.1.13).
+
+- **CarPlay settings in the car.** MENU → Audi smartphone interface → *Switch to CarPlay
+  settings*, with no phone connected. CarPlay in the virtual cockpit, directions, sport
+  view, arrival time first, the filling maneuver arrow, ending the MMI's own route, the
+  CarPlay map in the virtual cockpit and offering it to wireless adapters are switched
+  there; the choice is kept across ignition and reinstalls. Settings that need an MMI
+  restart say so.
+- **Restart CarPlay** in the same menu: when CarPlay doesn't come back after a reconnect,
+  it restarts the CarPlay services without restarting the MMI; then plug the iPhone in
+  again. If CarPlay still doesn't start (chefranov/mhi2-au37x-carplay#79), restart the
+  MMI.
+- **The touchpad as arrow keys and the album art can be left out at install:** `DPAD=0` /
+  `COVERART=0`, or an empty `NO_DPAD` / `NO_COVERART` file on the card.
+- **Installer: no setting options any more.** `SPORT`, `ETA_DEFAULT`, `MAP_ONLY` and
+  `WIRELESS_MAP` (and their files on the card) are gone. The first install of this
+  version sets every setting to its default; set yours once in the menu.
+- The menu's source is in [`src/mmi_settings`](src/mmi_settings) (GPL-3.0-or-later).
+
 ## k3346-v1.0.4 — 2026-11-16
 
 Based on chefranov's v1.1.13 (was v1.1.11), with every K3346 change carried over.
