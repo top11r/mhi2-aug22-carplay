@@ -4,9 +4,10 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
-## Unreleased
+## k3346-v1.2.0 — 2026-11-19
 
-The cockpit phone tab for CarPlay.
+The cockpit phone tab for CarPlay; based on k3346-v1.1.0 (chefranov's v1.1.13, with his
+test-79 `librgd_hook.so`).
 
 - **CarPlay calls on the virtual cockpit's phone tab.** An incoming call pops up in the
   cockpit; answer, decline, hang up, hold and resume, and mute from the cockpit, or answer
