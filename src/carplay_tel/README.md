@@ -23,9 +23,10 @@ What it does, at `mm-ipod` start:
    one u8 as parameter 0 (Action 0, or the hold / mute status), no CallUUID,
    so iOS takes the incoming or frontmost call; dial as InitiateCall (Type 0,
    the number, Service 1). A command older than 3 s is dropped.
-3. Registers a module with `librgd_hook`'s hook framework: when stock sends
-   StartCallStateUpdates `0x4154` it asks for the lists once per link (from its
-   own thread), and it turns every ListUpdate into the sticky bus text
+3. Registers a module with `librgd_hook`'s hook framework: on the first
+   incoming TelephonyUpdate `0x4158` of a link it asks for the lists once (from
+   its own thread; `on_transport_send` for stock's `0x4154` is a second path,
+   which the hook calls reliably only for messages sent through it), and it turns every ListUpdate into the sticky bus text
    (`EVT_TEL_LISTS`, `r.<i>.a|b|type|ts|occ`, `f.<i>.a|b`) that the jar shows
    on the cockpit as recents and favourites. A new identification starts with
    empty lists.

@@ -59,7 +59,7 @@ LOG=/tmp/carplay_install.log
 # everything else here is unaffected either way.
 RGI=${RGI:-1}
 RGD_SO=$LIB_DIR/librgd_hook.so
-# Answer / hang-up for the cockpit phone tab: preloaded into mm-ipod next to the hook.
+# Call actions and lists for the cockpit phone tab: preloaded into mm-ipod next to the hook.
 TEL_SO=$LIB_DIR/libcarplay_tel.so
 RGD_JAR=$JARS_DIR/rgd_hook.jar
 RENDER=$LIB_DIR/maneuver_render
@@ -814,7 +814,7 @@ SUP
     /mnt/app/eso/hmi/lib/rgd_render_sup.sh &
 if [ ! -f /mnt/app/rgd_disable ]; then
     LD_PRELOAD=/mnt/app/eso/hmi/lib/librgd_hook.so
-    # Answer / hang-up from the cockpit (libcarplay_tel.so needs the hook loaded).
+    # Call actions and lists for the cockpit (libcarplay_tel.so needs the hook loaded).
     [ -f /mnt/app/eso/hmi/lib/libcarplay_tel.so ] && \
         LD_PRELOAD=$LD_PRELOAD:/mnt/app/eso/hmi/lib/libcarplay_tel.so
     export LD_PRELOAD

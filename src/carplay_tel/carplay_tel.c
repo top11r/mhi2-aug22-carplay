@@ -17,10 +17,10 @@
  *     "ts::<ms>") and sends them with librgd_hook's harman_send_message(),
  *     which queues them to the driver's own thread. A command older than 3 s is
  *     dropped, never sent late;
- *  3. registers a module with librgd_hook's hook framework: when stock sends
- *     StartCallStateUpdates it asks for the lists once per link, and it turns
- *     every ListUpdate into the sticky bus text chefranov's jar reads
- *     (EVT_TEL_LISTS), which shows them on the cockpit.
+ *  3. registers a module with librgd_hook's hook framework: on the first
+ *     incoming TelephonyUpdate 0x4158 of a link it asks for the lists once,
+ *     and it turns every ListUpdate into the sticky bus text chefranov's jar
+ *     reads (EVT_TEL_LISTS), which shows them on the cockpit.
  * Wire formats from luka-dev/mib2q-carplay-rgi (IAP2_COMMUNICATIONS.md,
  * tel_hook.c, GPL-3.0): Action 0 as parameter 0, no CallUUID, so iOS takes the
  * incoming / frontmost call; the list request and entries as his hook.
@@ -452,8 +452,9 @@ static void send_cmd(const char *cmd, const char *num, long long ts)
 /* ---- Lists: a module of chefranov's hook framework (librgd_hook.so). ----
  * RE of his build (sha256 0be02a0e...1b62): a module is 9 words copied by
  * value; incoming frames {u16 msgid, u16 length, u32, payload, payload_len}
- * with ctx->direction 0; on_transport_send(ctx, msgid) for every outgoing
- * message; state 7 on IdentificationAccepted. Up to 8 modules, he registers 2. */
+ * with ctx->direction 0; on_transport_send(ctx, msgid) reliably only for
+ * messages sent through harman_send_message (car: not for stock's 0x4154);
+ * state 7 on IdentificationAccepted. Up to 8 modules, he registers 2. */
 struct hook_frame {
     uint16_t msgid;
     uint16_t length;
