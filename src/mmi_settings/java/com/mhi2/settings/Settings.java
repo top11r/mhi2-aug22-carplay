@@ -36,6 +36,9 @@ public final class Settings {
         new Settings("rgd_cancel_native", true, NEXT_PLUG, SCREEN_ROUTE_GUIDANCE, null),
         new Settings("altscreen_cluster_off", false, LIVE, SCREEN_COCKPIT_MAP, null),
         new Settings("altscreen_force", true, NEXT_PLUG, SCREEN_COCKPIT_MAP, null),
+        /* off: stock phone tab during CarPlay; GatedPhoneService reads it at every CarPlay connect.
+         * Last in the table so the ids of the rows above stay as they were. */
+        new Settings("rgd_phone_off", false, NEXT_PLUG, SCREEN_MAIN, RGD_JAR),
     };
 
     /* Flag file name in /mnt/app. */

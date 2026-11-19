@@ -14,6 +14,8 @@
   "rgd_cancel_native": "End MMI route when CarPlay navigates",
   "altscreen_cluster_off": "CarPlay map in virtual cockpit",
   "altscreen_force": "Offer map to wireless adapters",
+  "rgd_phone_off": "Phone tab in virtual cockpit",
+  "rgd_phone_off.hint": "CarPlay calls: answer, hold, mute.",
   "note.restarted": "CarPlay restarted. Plug in the iPhone again.",
   "note.not_saved": "The setting could not be saved."
 }

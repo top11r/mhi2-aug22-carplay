@@ -19,6 +19,9 @@ What it adds on AUG22 K3346:
   **Fill arrow as the turn gets closer** in the settings and restart the MMI.
 - **Cover art**: CarPlay album artwork on the cluster's now-playing widget.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
+- **Phone tab in the Virtual Cockpit**: CarPlay calls on the cockpit's phone tab:
+  answer, decline, hang up, hold and resume, mute, the steering-wheel Tel key, missed
+  calls, signal, and the iPhone's recents and favourites to call from.
 
 ## What differs from chefranov's release
 
@@ -35,7 +38,11 @@ What it adds on AUG22 K3346:
 - **No compiled shaders**: the K3346 GPU driver (17.37) compiles the renderers' built-in
   GLSL with its own run-time compiler, so no shader files are shipped or installed, and
   ones an earlier install left are removed.
-- **No phone tab**: the CarPlay call tap does not exist on this HMI (`rgd_no_tel` is set).
+- **Phone tab**: rebuilt for this HMI. Call state comes from the head unit's own
+  CarPlay service; call actions, recents, favourites and dialing go to the iPhone
+  through `libcarplay_tel.so` (ours, [`src/carplay_tel`](src/carplay_tel)), preloaded
+  into `mm-ipod` next to `librgd_hook.so`. chefranov's native telephony module stays
+  off (`rgd_no_tel` is set): its list traffic stalled the iPhone link on K3346.
 - **The car's own route is cancelled** when CarPlay route guidance starts (`rgd_cancel_native`
   is set): otherwise a route the car's navigation holds (resumed after a restart, or picked
   up when the phone was already navigating at connect) keeps the cluster.
@@ -113,6 +120,7 @@ interface → Switch to CarPlay settings**, with no phone connected.
 | Route guidance › End MMI route when CarPlay navigates | on | next phone plug |
 | Virtual cockpit map › CarPlay map in virtual cockpit | on | within 1 s (also the roller long press) |
 | Virtual cockpit map › Offer map to wireless adapters | off | next phone plug |
+| Phone tab in virtual cockpit (off: the stock phone tab during CarPlay) | on | next phone plug |
 | Restart CarPlay | – | restarts the CarPlay services; plug the iPhone in again |
 
 The first install of this version sets these defaults; later installs keep what was
@@ -129,6 +137,11 @@ chosen in the car. The installer options `SPORT`, `ETA_DEFAULT`, `MAP_ONLY` and
   first turn. A **short press of the left roller** swaps the line under the maneuver
   between the next street and the arrival time. Off without uninstalling: untick
   **CarPlay in virtual cockpit** in the settings and restart the MMI.
+- **Phone tab**: an incoming CarPlay call pops up in the cockpit; answer or decline
+  there or with the steering-wheel **Tel** key (pressed again, it hangs up). During a
+  call the tab offers hold, mute and end call. The call lists show the iPhone's
+  recents and favourites; select one to call it. The Tel key also clears the
+  missed-call icon. Off: untick **Phone tab in virtual cockpit** in the settings.
 - **Sport layout** is detected by itself; **Force sport view layout** forces it if that ever fails.
 - **CarPlay doesn't come back after a reconnect**: **Restart CarPlay** in the settings,
   then plug the iPhone in again. If it still doesn't start, restart the MMI
@@ -157,6 +170,9 @@ then restart the MMI.
   lane guidance), [Mich795](https://github.com/Mich795) (cover-art fixes) and
   [aberbic](https://github.com/aberbic/Audi-MHI2-Virtual-Cockpit-Altscreen-CarPlay-AndroidAuto)
   (the hardware-decoder layer setup for the cluster map).
+- **[luka-dev/mib2q-carplay-rgi](https://github.com/luka-dev/mib2q-carplay-rgi)**: the
+  iAP2 telephony message layouts and captured frames behind `libcarplay_tel.so`
+  (`IAP2_COMMUNICATIONS.md`, `tel_hook.c`) and the cockpit phone-tab notes.
 
 ## Licence
 
