@@ -27,11 +27,10 @@ What it adds on AUG22 K3346:
 
 - **Firmware**: the installer accepts `MHI2_*_AUG22_K3346` and `MHI2_*_AUG22_K3347` only
   (from `CachedTrain.txt` or the EEPROM) and stops, changing nothing, on anything else.
-- **`librgd_hook.so`**: chefranov's [test-79](https://github.com/chefranov/mhi2-au37x-carplay/releases/tag/test-79)
-  build, unchanged (a drop-in for v1.1.13): the hook sends from a thread of its own,
-  which fixes the `mm-ipod` lockup after reconnects
-  ([#79](https://github.com/chefranov/mhi2-au37x-carplay/issues/79)) and keeps the
-  cockpit's call actions instant.
+- **`librgd_hook.so`**: chefranov's, with his fix for the `mm-ipod` lockup after
+  reconnects ([#79](https://github.com/chefranov/mhi2-au37x-carplay/issues/79)): the
+  hook sends from a thread of its own, which also keeps the cockpit's call actions
+  instant.
 - **HMI jars** (`dpad_hook.jar`, `coverart_hook.jar`, `rgd_hook.jar`): rebuilt against the
   K3346 HMI.
 - **`libcarplay_hook.so`**: patched for the K3346 CarPlay library: the cluster stream's
