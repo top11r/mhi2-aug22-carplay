@@ -18,6 +18,7 @@ LOG=/tmp/carplay_uninstall.log
 
 # Route guidance (RGI)
 RGD_SO=$LIB_DIR/librgd_hook.so
+TEL_SO=$LIB_DIR/libcarplay_tel.so
 RGD_JAR=$JARS_DIR/rgd_hook.jar
 RENDER=$LIB_DIR/maneuver_render
 ATLAS=$LIB_DIR/flag_atlas.rgba
@@ -130,7 +131,7 @@ fi
 # The supervisor goes before the renderer it starts, so nothing restarts it
 # between the two.  Anything already running keeps running until the reboot
 # this script ends by asking for.
-for f in "$SUPERVISOR" "$RENDER" "$ATLAS" "$BLANK" "$RGD_JAR" "$RGD_SO"; do
+for f in "$SUPERVISOR" "$RENDER" "$ATLAS" "$BLANK" "$RGD_JAR" "$RGD_SO" "$TEL_SO"; do
     if [ -f "$f" ]; then
         rm -f "$f" && say "removed: $f" || say "!! could not remove $f"
     fi
@@ -160,7 +161,7 @@ fi
 # it away with the patch is right - there is nothing left for it to disable.
 rm -f /mnt/app/rgd_disable /mnt/app/rgd_cluster_ctx /mnt/app/rgd_rgtype \
       /mnt/app/rgd_sport /mnt/app/rgd_hook.log /mnt/app/rgd_render.log \
-      /mnt/app/rgd_render_hold /mnt/app/rgd_no_tel /mnt/app/rgd_cancel_native /mnt/app/rgd_keep_bap_symbol \
+      /mnt/app/rgd_render_hold /mnt/app/rgd_no_tel /mnt/app/rgd_phone_off /mnt/app/rgd_cancel_native /mnt/app/rgd_keep_bap_symbol \
       /mnt/app/rgd_eta_default /mnt/app/rgd_map_only "$LIB_DIR/.rgd_render_hold_set" \
       /mnt/app/rgd_no_arrow_fill /mnt/app/rgd_rearm /mnt/app/rgd_maps30 /mnt/app/pdc_log \
       /mnt/app/rgd_hook.log.prev /mnt/app/carplay_hook.log \

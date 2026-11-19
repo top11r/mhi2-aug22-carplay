@@ -4,6 +4,31 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## Unreleased
+
+The cockpit phone tab for CarPlay.
+
+- **CarPlay calls on the virtual cockpit's phone tab.** An incoming call pops up in the
+  cockpit; answer, decline, hang up, hold and resume, and mute from the cockpit, or answer
+  and hang up with the steering-wheel Tel key. Missed calls show on the tab; the Tel key
+  clears them. Signal and carrier follow the iPhone.
+- **Recents and favourites from the iPhone** in the cockpit's call lists; select one to
+  call it. Numbers are cleaned before dialling (chefranov's #29 fix).
+- **After "Restart CarPlay"** calls still reach the tab.
+- **`librgd_hook.so` is chefranov's [test-79](https://github.com/chefranov/mhi2-au37x-carplay/releases/tag/test-79)
+  build** (unchanged, a drop-in for v1.1.13): the hook sends from a thread of its own.
+  CarPlay comes back after quick re-plugs (chefranov/mhi2-au37x-carplay#79), and the
+  cockpit's call actions are instant instead of 2–6 s late.
+- **Settings: *Phone tab in virtual cockpit*** (on by default): off gives the stock phone
+  tab during CarPlay, from the next phone plug.
+- New `libcarplay_tel.so`, preloaded into `mm-ipod` next to `librgd_hook.so`; its source
+  and host tests are in [`src/carplay_tel`](src/carplay_tel) (GPL-3.0-or-later).
+
+Tester checklist: an incoming call (popup, answer, decline), Tel key answer and hang-up,
+hold and resume (the held call shows again), mute, a missed call (icon, Tel key clears
+it), recents and favourites (call one of each), "Restart CarPlay" then a call, a quick
+unplug and replug.
+
 ## k3346-v1.1.0 — 2026-11-17
 
 The CarPlay settings menu; based on k3346-v1.0.4 (chefranov's v1.1.13).

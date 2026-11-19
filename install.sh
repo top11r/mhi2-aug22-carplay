@@ -59,6 +59,8 @@ LOG=/tmp/carplay_install.log
 # everything else here is unaffected either way.
 RGI=${RGI:-1}
 RGD_SO=$LIB_DIR/librgd_hook.so
+# Call actions and lists for the cockpit phone tab: preloaded into mm-ipod next to the hook.
+TEL_SO=$LIB_DIR/libcarplay_tel.so
 RGD_JAR=$JARS_DIR/rgd_hook.jar
 RENDER=$LIB_DIR/maneuver_render
 ATLAS=$LIB_DIR/flag_atlas.rgba
@@ -240,7 +242,7 @@ done
 [ "$COVERART" = "0" ] || [ -f "$BIN_DIR/coverart_hook.jar" ] || die "missing payload file: $BIN_DIR/coverart_hook.jar (or set COVERART=0)"
 
 if [ "$RGI" != "0" ]; then
-    for f in rgd_hook.jar librgd_hook.so; do
+    for f in rgd_hook.jar librgd_hook.so libcarplay_tel.so; do
         [ -f "$BIN_DIR/$f" ] || die "missing payload file: $BIN_DIR/$f (or set RGI=0)"
     done
     for f in maneuver_render flag_atlas.rgba rgd_blank.png; do
@@ -685,6 +687,11 @@ if [ "$RGI" != "0" ]; then
     mv "$RGD_SO.new" "$RGD_SO" || die "could not put librgd_hook.so in place"
     say "ok: $RGD_SO"
 
+    cp "$BIN_DIR/libcarplay_tel.so" "$TEL_SO.new" || die "copy libcarplay_tel.so failed"
+    chmod 755 "$TEL_SO.new"
+    mv "$TEL_SO.new" "$TEL_SO" || die "could not put libcarplay_tel.so in place"
+    say "ok: $TEL_SO"
+
     # The renderer. A process of its own: it draws the maneuver live into a
     # window of its own that the cluster composites over the head unit's map,
     # and the jar above tells it what to draw.
@@ -711,8 +718,17 @@ if [ "$RGI" != "0" ]; then
         rm -r "$SHADER_DIR" 2>/dev/null
         say "removed: $SHADER_DIR (blobs for another GPU driver)"
     fi
+    # rgd_no_tel keeps librgd_hook's own telephony module off (its list
+    # traffic stalled the iAP2 link on K3346). Call actions come from our
+    # libcarplay_tel.so instead; the cockpit phone tab has its own off switch,
+    # /mnt/app/rgd_phone_off (settings row), which the installer never touches.
     touch /mnt/app/rgd_no_tel || die "could not create /mnt/app/rgd_no_tel"
-    say "ok: no phone tab in this build (/mnt/app/rgd_no_tel)"
+    say "ok: native telephony off (/mnt/app/rgd_no_tel)"
+    if [ -f /mnt/app/rgd_phone_off ]; then
+        say "ok: cockpit phone tab off (/mnt/app/rgd_phone_off kept)"
+    else
+        say "ok: cockpit phone tab on (touch /mnt/app/rgd_phone_off to switch it off)"
+    fi
 
     # The supervisor keeps exactly one renderer alive. Started by the shim
     # below, so it comes up with the CarPlay session and goes with the ignition.
@@ -798,6 +814,9 @@ SUP
     /mnt/app/eso/hmi/lib/rgd_render_sup.sh &
 if [ ! -f /mnt/app/rgd_disable ]; then
     LD_PRELOAD=/mnt/app/eso/hmi/lib/librgd_hook.so
+    # Call actions and lists for the cockpit (libcarplay_tel.so needs the hook loaded).
+    [ -f /mnt/app/eso/hmi/lib/libcarplay_tel.so ] && \
+        LD_PRELOAD=$LD_PRELOAD:/mnt/app/eso/hmi/lib/libcarplay_tel.so
     export LD_PRELOAD
 fi
 exec /mnt/app/armle/usr/sbin/rgd_real/mm-ipod "$@"
@@ -880,7 +899,7 @@ if [ "$RGI" = "0" ] && { [ -f "$RGD_JAR" ] || [ -f "$SBIN/rgd_real/mm-ipod" ]; }
             && mv "$SBIN/mm-ipod.new" "$SBIN/mm-ipod" \
             && say "restored $SBIN/mm-ipod" || die "could not restore $SBIN/mm-ipod"
     fi
-    for f in "$SUPERVISOR" "$RENDER" "$ATLAS" "$BLANK" "$RGD_JAR" "$RGD_SO"; do
+    for f in "$SUPERVISOR" "$RENDER" "$ATLAS" "$BLANK" "$RGD_JAR" "$RGD_SO" "$TEL_SO"; do
         [ -f "$f" ] && { rm -f "$f" && say "removed: $f" || say "!! could not remove $f"; }
     done
     if [ -d "$SHADER_DIR" ]; then
@@ -923,7 +942,7 @@ ls -l "$SO_DEST" 2>&1 | while IFS= read -r l; do say "$l"; done
 [ "$COVERART" = "0" ] || ls -l "$JARS_DIR/coverart_hook.jar" 2>&1 | while IFS= read -r l; do say "$l"; done
 [ "$PDC" = "1" ] && ls -l "$JARS_DIR/pdc_hook.jar" 2>&1 | while IFS= read -r l; do say "$l"; done
 if [ "$RGI" != "0" ]; then
-    ls -l "$RGD_JAR" "$RGD_SO" "$RENDER" "$ATLAS" "$BLANK" "$SUPERVISOR" "$SBIN/mm-ipod" 2>&1 \
+    ls -l "$RGD_JAR" "$RGD_SO" "$TEL_SO" "$RENDER" "$ATLAS" "$BLANK" "$SUPERVISOR" "$SBIN/mm-ipod" 2>&1 \
         | while IFS= read -r l; do say "$l"; done
 fi
 if [ "$ALTSCREEN" != "0" ]; then
