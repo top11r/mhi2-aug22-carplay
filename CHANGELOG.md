@@ -15,6 +15,10 @@ The cockpit phone tab for CarPlay.
 - **Recents and favourites from the iPhone** in the cockpit's call lists; select one to
   call it. Numbers are cleaned before dialling (chefranov's #29 fix).
 - **After "Restart CarPlay"** calls still reach the tab.
+- **`librgd_hook.so` is chefranov's [test-79](https://github.com/chefranov/mhi2-au37x-carplay/releases/tag/test-79)
+  build** (unchanged, a drop-in for v1.1.13): the hook sends from a thread of its own.
+  CarPlay comes back after quick re-plugs (chefranov/mhi2-au37x-carplay#79), and the
+  cockpit's call actions are instant instead of 2–6 s late.
 - **Settings: *Phone tab in virtual cockpit*** (on by default): off gives the stock phone
   tab during CarPlay, from the next phone plug.
 - New `libcarplay_tel.so`, preloaded into `mm-ipod` next to `librgd_hook.so`; its source
