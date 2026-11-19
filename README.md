@@ -56,7 +56,7 @@ HMI mod first; the installer stops if it finds one.
 | | |
 |---|---|
 | **`MHI2_US_AUG22_K3347`** (NAR) | Same HMI release, byte-identical CarPlay natives (only 12 unrelated HMI classes differ). Confirmed on a car: album art, route guidance, the CarPlay map. |
-| **Wireless adapters** | The CarPlay map works through an adapter that passes the cluster stream. **Ottocast Mini Cube 3**: confirmed. **Carlinkit Mini Ultra 3**: CarPlay runs but the cluster stream was not opened; an adapter firmware update might be needed. Roller zoom works by cable only. |
+| **Wireless adapters** | The CarPlay map works through an adapter that passes the cluster stream. **Ottocast Mini Cube 3**: confirmed, roller zoom included, with [zakklmv's adapter firmware](https://github.com/zakklmv/wireless-carplay-altscreen-dongles) (modified firmware, flashing is at your own risk; read its warnings first). **Carlinkit Mini Ultra 3**: CarPlay runs but the cluster stream was not opened on stock firmware; zakklmv's firmware lists it as supported. Without a modified adapter firmware, roller zoom works by cable only. |
 | **Navigation apps** | Route guidance: Apple Maps and Google Maps. Waze sends no turn-by-turn data over CarPlay; its map still shows in the cockpit. |
 | **Other firmware** | The installer accepts `MHI2_*_AUG22_K3346` and `MHI2_*_AUG22_K3347` only and stops, changing nothing, on anything else. |
 
