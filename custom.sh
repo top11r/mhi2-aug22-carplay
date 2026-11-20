@@ -20,8 +20,8 @@
 # on the card beside install.sh; to leave out only the CarPlay map in the
 # cluster, one named NO_ALTSCREEN.  An empty NO_DPAD file leaves out the
 # touchpad as arrow keys, an empty NO_COVERART file the album art in the
-# virtual cockpit.  An empty PDC file installs the parking popup beside CarPlay
-# (K3346 only).  If the installer stops on jars it does not
+# virtual cockpit.  An empty PDC file installs the parking popup beside CarPlay.
+# If the installer stops on jars it does not
 # know and you are sure they are harmless, an empty IGNORE_CONFLICTS file lets
 # it go on.  There is no way to pass an environment variable through the
 # M.I.B. menu, and the files combine.
@@ -95,7 +95,7 @@ else
     fi
     P=0
     if [ -f "$PAYLOAD/PDC" ]; then
-        echo "PDC marker present - installing the parking popup beside CarPlay (K3346 only)"
+        echo "PDC marker present - installing the parking popup beside CarPlay"
         P=1
     fi
     I=0

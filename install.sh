@@ -90,8 +90,8 @@ ALT_FORCE=/mnt/app/altscreen_force
 # up (#27), on Q2 P5600 two of them differ too, and forcing it onto such
 # firmware is what kept leaving units on the start logo.  So it is off unless
 # asked for: PDC=1 (an empty PDC file on the card) installs it, and only on
-# firmware whose classes were checked against it.  Left out, an earlier copy is
-# removed.
+# K3346, whose classes it was built and checked against, and K3347, the same HMI
+# release.  Left out, an earlier copy is removed.
 PDC=${PDC:-0}
 
 # The touchpad as arrow keys in CarPlay (dpad_hook.jar) and the album art in the
@@ -264,13 +264,13 @@ fi
 
 if [ "$PDC" = "1" ]; then
     case "$TRAIN" in
-        MHI2_*_AUG22_K3346*) ;;
+        MHI2_*_AUG22_K3346*|MHI2_*_AUG22_K3347*) ;;
         *) PDC=0
            say "parking popup beside CarPlay: not checked on this firmware - left out" ;;
     esac
 else
     PDC=0
-    say "parking popup beside CarPlay: off (PDC=1 installs it on K3346)"
+    say "parking popup beside CarPlay: off (PDC=1 installs it)"
 fi
 if [ "$PDC" = "1" ] && [ ! -f "$BIN_DIR/pdc_hook.jar" ]; then
     die "missing payload file: $BIN_DIR/pdc_hook.jar (or set PDC=0)"
