@@ -132,7 +132,7 @@ die() {
 }
 
 : > "$LOG" 2>/dev/null
-say "=== MHI2 AU37x CarPlay patches - install (private K3346 build) ==="
+say "=== MHI2 AU37x CarPlay patches - install (private K3346 build, K3345 TEST) ==="
 if [ -f "$SRC_DIR/VERSION" ]; then
     read -r VERSION < "$SRC_DIR/VERSION"
     say "release: $VERSION"
@@ -199,11 +199,14 @@ case "$TRAIN" in
     # K3347 (NAR): same HMI release (G22_C6_190300) and byte-identical CarPlay
     # natives as K3346; only 12 unrelated HMI classes differ.
     MHI2_*_AUG22_K3347*) TRAIN_OK=1 ;;
+    # K3345 TEST: the US package with MU 1439 MMX2 build 967, the same build a
+    # K3347 unit runs (HMI G22_C6_190300); untested on a car.
+    MHI2_*_AUG22_K3345*) TRAIN_OK=1 ;;
     "") ;;
     *) TRAIN_OK=0 ;;
 esac
 
-# EEPROM: "MHI2_" at 0..4, "_AUG22_" at 7..13, "K3346" or "K3347" at 14..18.
+# EEPROM: "MHI2_" at 0..4, "_AUG22_" at 7..13, "K3346", "K3347" or "K3345" at 14..18.
 if [ -z "$TRAIN_OK" ]; then
     HEX=""
     for tok in $(on -f rcc /net/rcc/usr/apps/modifyE2P r 3A0 19 2>/dev/null); do
@@ -216,6 +219,8 @@ if [ -z "$TRAIN_OK" ]; then
             TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3346 (from EEPROM)" ;;
         " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 37"*)
             TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3347 (from EEPROM)" ;;
+        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 35"*)
+            TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3345 (from EEPROM)" ;;
         "") ;;
         *) TRAIN_OK=0; TRAIN="(EEPROM bytes:$HEX)" ;;
     esac
@@ -224,7 +229,7 @@ fi
 case "$TRAIN_OK" in
     1) say "firmware train: $TRAIN - ok" ;;
     0) say "!! firmware train: $TRAIN"
-       say "!! This private build is for MHI2_*_AUG22_K3346 and K3347 only: its jars are built"
+       say "!! This private build is for MHI2_*_AUG22_K3346, K3347 and K3345 (test) only: its jars are built"
        say "!! against that firmware's HMI and its hook carries that firmware's"
        say "!! offsets; on another one they can leave the main screen black."
        die "unsupported firmware train" ;;
@@ -264,7 +269,7 @@ fi
 
 if [ "$PDC" = "1" ]; then
     case "$TRAIN" in
-        MHI2_*_AUG22_K3346*|MHI2_*_AUG22_K3347*) ;;
+        MHI2_*_AUG22_K3346*|MHI2_*_AUG22_K3347*|MHI2_*_AUG22_K3345*) ;;
         *) PDC=0
            say "parking popup beside CarPlay: not checked on this firmware - left out" ;;
     esac
