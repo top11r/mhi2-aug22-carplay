@@ -58,7 +58,7 @@ HMI mod first; the installer stops if it finds one.
 
 | | |
 |---|---|
-| **`MHI2_US_AUG22_K3347`** (NAR) | Same HMI release, byte-identical CarPlay natives (only 12 unrelated HMI classes differ). Confirmed on a car: album art, route guidance, the CarPlay map. The parking-sensor popup beside CarPlay is installed on K3346 only. |
+| **`MHI2_US_AUG22_K3347`** (NAR) | Same HMI release, byte-identical CarPlay natives (only 12 unrelated HMI classes differ). Confirmed on a car: album art, route guidance, the CarPlay map. |
 | **Wireless adapters** | The CarPlay map works through an adapter that passes the cluster stream. **Ottocast Mini Cube 3**: confirmed, roller zoom included, with [zakklmv's adapter firmware](https://github.com/zakklmv/wireless-carplay-altscreen-dongles) for the [Ottocast CA530 (ly5140)](https://github.com/zakklmv/wireless-carplay-altscreen-dongles/tree/main/firmware/liaoyuan/ly5140-ottocast-ca530), built for its stock firmware `26101218.5140.2` only (modified firmware, flashing is at your own risk; read its warnings first). **Carlinkit Mini Ultra 3**: CarPlay runs but the cluster stream was not opened on stock firmware; zakklmv's firmware lists it as supported. Without a modified adapter firmware, roller zoom works by cable only. |
 | **Navigation apps** | Route guidance: Apple Maps and Google Maps. Waze sends no turn-by-turn data over CarPlay; its map still shows in the cockpit. |
 | **`MHI2_*_AUG22_K3344`** | Experimental: a [test build](https://github.com/top11r/mhi2-aug22-carplay/releases/tag/k3346-v1.2.0-k3344-test1) (k3346-v1.2.0 with an installer that also accepts K3344), not yet tested on a car. Volunteers and results welcome in [#10](https://github.com/top11r/mhi2-aug22-carplay/issues/10). |
