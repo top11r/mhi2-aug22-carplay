@@ -9,7 +9,7 @@ on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay
 The parking-sensor popup beside CarPlay; based on k3346-v1.2.0.
 
 - **Parking sensors beside CarPlay** (opt-in: `PDC=1`, or an empty `PDC` file on the
-  card; K3346 only). When the side sensors open their popup, CarPlay stays on screen
+  card). When the side sensors open their popup, CarPlay stays on screen
   beside it instead of the head unit taking over; the status line and the "Check
   surroundings!" drawer stay off CarPlay meanwhile. Reverse gear, the camera, an active
   parking assistant and HOME are unchanged. luka-dev's guard for MHI2Q, ported to the
