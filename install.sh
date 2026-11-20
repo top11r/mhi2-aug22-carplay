@@ -264,13 +264,13 @@ fi
 
 if [ "$PDC" = "1" ]; then
     case "$TRAIN" in
-        MHI2_ER_AU37[xX]_P5089*|MHI2_ER_AU276_P5088*) ;;
+        MHI2_*_AUG22_K3346*) ;;
         *) PDC=0
            say "parking popup beside CarPlay: not checked on this firmware - left out" ;;
     esac
 else
     PDC=0
-    say "parking popup beside CarPlay: off (PDC=1 installs it on P5089 / Q2 P5088)"
+    say "parking popup beside CarPlay: off (PDC=1 installs it on K3346)"
 fi
 if [ "$PDC" = "1" ] && [ ! -f "$BIN_DIR/pdc_hook.jar" ]; then
     die "missing payload file: $BIN_DIR/pdc_hook.jar (or set PDC=0)"
