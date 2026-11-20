@@ -6,7 +6,8 @@ Virtual Cockpit**, for Audi MHI2 head units on **`MHI2_ER_AUG22_K3346`** (MU1438
 A port of **[chefranov's CarPlay patches](https://github.com/chefranov/mhi2-au37x-carplay)**
 (v1.1.13) to the AUG22 K3346 firmware, made **with chefranov's permission**. His
 installer, jars and native parts do the heavy lifting; this build adapts them to K3346,
-adds the cockpit phone tab and keeps only what was tested on that firmware.
+adds the cockpit phone tab and the parking-sensor popup beside CarPlay, and keeps only
+what was tested on that firmware.
 
 **[⬇ Download the latest release](https://github.com/top11r/mhi2-aug22-carplay/releases/latest)**
 · [Changelog](CHANGELOG.md)
@@ -33,8 +34,8 @@ adds the cockpit phone tab and keeps only what was tested on that firmware.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
 - **Parking sensors beside CarPlay** (opt-in, `PDC`): the side sensor popup opens next
   to CarPlay instead of replacing it. Reverse gear and the camera are unchanged.
-- **CarPlay settings in the car**: every feature can be switched in the MMI's own menu,
-  no reinstall needed.
+- **CarPlay settings in the car**: the cockpit features can be switched in the MMI's own
+  menu, no reinstall needed.
 
 <sub>Photos: chefranov's project.</sub>
 
@@ -133,6 +134,11 @@ The first install sets these defaults; later installs keep what was chosen in th
   call the tab offers hold, mute and end call. The call lists show the iPhone's
   recents and favourites; select one to call it. The Tel key also clears the
   missed-call icon.
+- **Parking sensors** (installed with `PDC`): when the sensors wake up with CarPlay on
+  screen, their popup opens on the right and CarPlay stays beside it; the knob goes to
+  the popup until it closes. Reverse gear and the camera views still take the whole
+  screen and return to CarPlay. The speaker button on the popup mutes the beeps as
+  usual.
 - **Sport layout** is detected by itself; **Force sport view layout** forces it if that
   ever fails.
 - **CarPlay doesn't come back after a reconnect**: **Restart CarPlay** in the settings,
