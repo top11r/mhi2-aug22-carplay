@@ -31,6 +31,8 @@ adds the cockpit phone tab and keeps only what was tested on that firmware.
   hang up with the steering-wheel **Tel** key. Missed calls, signal, and the iPhone's
   recents and favourites to call from.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
+- **Parking sensors beside CarPlay** (opt-in, `PDC`): the side sensor popup opens next
+  to CarPlay instead of replacing it. Reverse gear and the camera are unchanged.
 - **CarPlay settings in the car**: every feature can be switched in the MMI's own menu,
   no reinstall needed.
 
@@ -93,6 +95,7 @@ Running the installer again upgrades in place and keeps the settings chosen in t
 | leave out only the cluster map | `ALTSCREEN=0 sh install.sh` | `NO_ALTSCREEN` |
 | leave out the touchpad as arrow keys | `DPAD=0 sh install.sh` | `NO_DPAD` |
 | leave out the album art in the virtual cockpit | `COVERART=0 sh install.sh` | `NO_COVERART` |
+| put the parking-sensor popup beside CarPlay (off by default) | `PDC=1 sh install.sh` | `PDC` |
 | let unknown jars through | `IGNORE_CONFLICTS=1 sh install.sh` | `IGNORE_CONFLICTS` |
 
 ## Settings
@@ -174,7 +177,9 @@ then restart the MMI.
 - **The car's own route is cancelled** when CarPlay route guidance starts
   (`rgd_cancel_native`, the *End MMI route when CarPlay navigates* setting).
 - **CarPlay settings menu** ([`src/mmi_settings`](src/mmi_settings)): ours.
-- **No parking popup**: not ported to this HMI.
+- **Parking sensors beside CarPlay** ([`src/pdc_hook`](src/pdc_hook)): luka-dev's guard
+  for MHI2Q, ported to the K3346 HMI; replaces seven stock HMI classes, so it goes in
+  only with `PDC` and only on K3346.
 
 ## Credits
 
@@ -188,12 +193,13 @@ then restart the MMI.
   (the hardware-decoder layer setup for the cluster map).
 - **[luka-dev/mib2q-carplay-rgi](https://github.com/luka-dev/mib2q-carplay-rgi)**: the
   iAP2 telephony message layouts and captured frames behind `libcarplay_tel.so`
-  (`IAP2_COMMUNICATIONS.md`, `tel_hook.c`) and the cockpit phone-tab notes.
+  (`IAP2_COMMUNICATIONS.md`, `tel_hook.c`) and the cockpit phone-tab notes, and the
+  parking-sensor guard behind `pdc_hook.jar` (`PDC_SMALL_STAGE.md`), GPL-3.0-or-later.
 
 ## Licence
 
-Everything in this repository is under chefranov's [LICENSE](LICENSE), except top11r's
-own code, which is under GPL-3.0-or-later:
+Everything in this repository is under chefranov's [LICENSE](LICENSE), except the code
+below, which is under GPL-3.0-or-later:
 
 - [`src/mmi_settings`](src/mmi_settings) (the CarPlay settings menu,
   `bin/mmi_settings.jar`), with an additional permission to combine it with the head
@@ -203,3 +209,8 @@ own code, which is under GPL-3.0-or-later:
 - [`src/carplay_tel`](src/carplay_tel) (`bin/libcarplay_tel.so`, the phone tab's call
   actions and lists; see [`src/carplay_tel/LICENSE`](src/carplay_tel/LICENSE)). It is
   built with `src/carplay_tel/build.sh` in a QNX 6.5 toolchain container.
+- [`src/pdc_hook`](src/pdc_hook) (`bin/pdc_hook.jar`, the parking-sensor popup beside
+  CarPlay), luka-dev's GPL-3.0-or-later code ported by top11r (see
+  [`src/pdc_hook/LICENSE`](src/pdc_hook/LICENSE)); its replacements of stock HMI
+  classes cover only the changes. It is built with `src/pdc_hook/build.sh` and a stock
+  `lsd.jar` converted from your own unit.
