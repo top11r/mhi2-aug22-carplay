@@ -37,7 +37,7 @@ what was tested on that firmware.
 - **CarPlay settings in the car**: the cockpit features can be switched in the MMI's own
   menu, no reinstall needed.
 
-<sub>Route guidance and album art photos: chefranov's project.</sub>
+<sub>Album art photo: chefranov's project.</sub>
 
 ## Quick start
 
