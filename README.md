@@ -14,7 +14,7 @@ what was tested on that firmware.
 
 > **Private build.** Use at your own risk; everything is reversible with the uninstaller.
 
-![The CarPlay map in the Virtual Cockpit](docs/altscreen.jpg)
+![The CarPlay map and route guidance in the Virtual Cockpit of an Audi S4](docs/s4.jpg)
 
 ## Features
 
@@ -37,7 +37,7 @@ what was tested on that firmware.
 - **CarPlay settings in the car**: the cockpit features can be switched in the MMI's own
   menu, no reinstall needed.
 
-<sub>Photos: chefranov's project.</sub>
+<sub>Route guidance and album art photos: chefranov's project.</sub>
 
 ## Quick start
 
