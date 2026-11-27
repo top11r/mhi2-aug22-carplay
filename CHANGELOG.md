@@ -4,6 +4,25 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## k3346-v1.4.0 — 2026-11-27
+
+The approach bar and the head-up display's arrow, parking sensors on by default and the
+settings menu in Ukrainian; based on k3346-v1.3.0.
+
+- **CarPlay settings menu in Ukrainian** (#18, by yety-ua): shown when the
+  [Ukrainian localization package](https://github.com/yety-ua/mhi2-ukrainian-localization)
+  is installed; the stock MMI has no Ukrainian, so without it the menu stays in English.
+- **Parking sensors beside CarPlay are on by default.** Leave them out with `PDC=0`, or
+  an empty `NO_PDC` file on the card; the `PDC` file is no longer needed.
+- **The approach bar empties after a maneuver.** On a long stretch after a turn, the
+  bar on the cockpit's maneuver tile kept the passed maneuver's last level until the next
+  maneuver's approach began; it is now empty until then.
+- **Head-up display keeps the maneuver arrow.** The installer turns on
+  `rgd_keep_bap_symbol`, so the car gets the real maneuver symbol and the head-up display
+  no longer drops the arrow after a few seconds; the line under the maneuver on the
+  cockpit's tile stays as before. `rm /mnt/app/rgd_keep_bap_symbol` turns it off until the
+  next install.
+
 ## k3346-v1.3.0 — 2026-11-20
 
 The parking-sensor popup beside CarPlay; based on k3346-v1.2.0.

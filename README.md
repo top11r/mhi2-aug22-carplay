@@ -32,7 +32,7 @@ what was tested on that firmware.
   hang up with the steering-wheel **Tel** key. Missed calls, signal, and the iPhone's
   recents and favourites to call from.
 - **Touchpad → D-pad**: the MMI touchpad navigates CarPlay menus.
-- **Parking sensors beside CarPlay** (opt-in, `PDC`): the side sensor popup opens next
+- **Parking sensors beside CarPlay**: the side sensor popup opens next
   to CarPlay instead of replacing it. Reverse gear and the camera are unchanged.
 - **CarPlay settings in the car**: the cockpit features can be switched in the MMI's own
   menu, no reinstall needed.
@@ -96,7 +96,7 @@ Running the installer again upgrades in place and keeps the settings chosen in t
 | leave out only the cluster map | `ALTSCREEN=0 sh install.sh` | `NO_ALTSCREEN` |
 | leave out the touchpad as arrow keys | `DPAD=0 sh install.sh` | `NO_DPAD` |
 | leave out the album art in the virtual cockpit | `COVERART=0 sh install.sh` | `NO_COVERART` |
-| put the parking-sensor popup beside CarPlay (off by default) | `PDC=1 sh install.sh` | `PDC` |
+| leave out the parking-sensor popup beside CarPlay | `PDC=0 sh install.sh` | `NO_PDC` |
 | let unknown jars through | `IGNORE_CONFLICTS=1 sh install.sh` | `IGNORE_CONFLICTS` |
 
 ## Settings
@@ -119,6 +119,11 @@ connected. Settings are changed in the car, not by the installer.
 
 The first install sets these defaults; later installs keep what was chosen in the car.
 
+The menu follows the MMI's language: English, and Ukrainian when the
+[Ukrainian localization package](https://github.com/yety-ua/mhi2-ukrainian-localization)
+is installed (the stock K3346 MMI has no Ukrainian, so without it the menu stays in
+English).
+
 ## Using it
 
 - **Cluster map**: comes up with the phone, after a short "CarPlay Navigation" intro. A
@@ -134,7 +139,7 @@ The first install sets these defaults; later installs keep what was chosen in th
   call the tab offers hold, mute and end call. The call lists show the iPhone's
   recents and favourites; select one to call it. The Tel key also clears the
   missed-call icon.
-- **Parking sensors** (installed with `PDC`): when the sensors wake up with CarPlay on
+- **Parking sensors** (left out with `NO_PDC`): when the sensors wake up with CarPlay on
   screen, their popup opens on the right and CarPlay stays beside it; the knob goes to
   the popup until it closes. Reverse gear and the camera views still take the whole
   screen and return to CarPlay. The speaker button on the popup mutes the beeps as
@@ -184,8 +189,8 @@ then restart the MMI.
   (`rgd_cancel_native`, the *End MMI route when CarPlay navigates* setting).
 - **CarPlay settings menu** ([`src/mmi_settings`](src/mmi_settings)): ours.
 - **Parking sensors beside CarPlay** ([`src/pdc_hook`](src/pdc_hook)): luka-dev's guard
-  for MHI2Q, ported to the K3346 HMI; replaces seven stock HMI classes, so it goes in
-  only with `PDC` and only on K3346.
+  for MHI2Q, ported to the K3346 HMI; replaces seven stock HMI classes, checked on K3346
+  and K3347.
 
 ## Credits
 

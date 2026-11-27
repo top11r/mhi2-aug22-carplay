@@ -42,3 +42,9 @@ Keep `{placeholders}` as they are, save as UTF-8, and keep row labels short – 
 shows about 40 characters. The build refuses a file with a key that is not in `en.json`,
 different placeholders, or text that is not UTF-8, and names the file and key. The menu
 follows the HMI's language; a language without a file is shown in English.
+
+Languages: English (`en`), Ukrainian (`uk`, from
+[#18](https://github.com/top11r/mhi2-aug22-carplay/issues/18); the stock K3346 HMI has
+no Ukrainian, so it shows only with the
+[Ukrainian localization package](https://github.com/yety-ua/mhi2-ukrainian-localization)
+installed).

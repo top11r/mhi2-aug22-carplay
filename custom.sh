@@ -20,7 +20,7 @@
 # on the card beside install.sh; to leave out only the CarPlay map in the
 # cluster, one named NO_ALTSCREEN.  An empty NO_DPAD file leaves out the
 # touchpad as arrow keys, an empty NO_COVERART file the album art in the
-# virtual cockpit.  An empty PDC file installs the parking popup beside CarPlay.
+# virtual cockpit, an empty NO_PDC file the parking popup beside CarPlay.
 # If the installer stops on jars it does not
 # know and you are sure they are harmless, an empty IGNORE_CONFLICTS file lets
 # it go on.  There is no way to pass an environment variable through the
@@ -93,10 +93,10 @@ else
         echo "NO_COVERART marker present - installing without the album art in the virtual cockpit"
         C=0
     fi
-    P=0
-    if [ -f "$PAYLOAD/PDC" ]; then
-        echo "PDC marker present - installing the parking popup beside CarPlay"
-        P=1
+    P=1
+    if [ -f "$PAYLOAD/NO_PDC" ]; then
+        echo "NO_PDC marker present - installing without the parking popup beside CarPlay"
+        P=0
     fi
     I=0
     if [ -f "$PAYLOAD/IGNORE_CONFLICTS" ]; then
