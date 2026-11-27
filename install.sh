@@ -3,11 +3,11 @@
 # install.sh - installs the MHI2 AU37x CarPlay patches ON THE UNIT.
 #
 # PRIVATE K3346 BUILD (MHI2_ER_AUG22_K3346, MU1438) - not for distribution.
-# His v1.1.13 installer, ported to what was tested on the car: K3346 only,
-# HMI jars rebuilt against the MU1438 HMI, libcarplay_hook.so with the K3346
-# patches, no compiled shaders (both renderers compile their built-in GLSL
-# with the unit's own compiler), no phone tab, no parking popup, and the
-# K3346 stage test installs taken over.
+# His v1.1.13 installer, ported to what was tested on the car: K3346 and K3347
+# only, HMI jars rebuilt against the MU1438 HMI, libcarplay_hook.so with the
+# K3346 patches, no compiled shaders (both renderers compile their built-in
+# GLSL with the unit's own compiler), and the K3346 stage test installs taken
+# over.
 #
 # Runs on the head unit itself (QNX 6.5 /bin/sh) - either over ssh/telnet
 # after copying this directory across, or from the SD card via M.I.B.
@@ -15,25 +15,25 @@
 #
 # What it does:
 #   0. Checks the firmware train and stops, changing nothing, on anything
-#      that is not MHI2_*_AU37x_* or MHI2_*_AU276_* (Audi Q2), on AU37x
-#      ER builds up to P3242 (too old), or when another CarPlay/HMI mod is
-#      on the unit (MIBSI, mib2q-carplay-rgi, unknown jars;
-#      IGNORE_CONFLICTS=1 lets unknown jars through).
+#      that is not MHI2_*_AUG22_K3346* or K3347*, or when another CarPlay/HMI
+#      mod is on the unit (MIBSI, mib2q-carplay-rgi, unknown jars;
+#      IGNORE_CONFLICTS=1 lets unknown jars through).  Every part below is
+#      for these two trains, so none checks the train again.
 #      M.I.B.'s NavActiveIgnore jar is switched off, uninstall puts it back.
 #   1. Remounts /mnt/app and /mnt/system read-write.
 #   2. Backs up every file it is going to change, once, as <file>.orig.
 #   3. Copies the jars into the HMI's jar directory (D-pad and cover art unless
-#      left out with DPAD=0 / COVERART=0, the CarPlay settings menu, and, on
-#      firmware it was checked against, the parking-sensor popup beside CarPlay)
+#      left out with DPAD=0 / COVERART=0, the CarPlay settings menu, and the
+#      parking-sensor popup beside CarPlay unless left out with PDC=0)
 #      and the native hooks into /mnt/app/eso/hmi/lib.
 #   4. Adds LD_PRELOAD for the cover-art hook to the carplay child in
 #      smartphone_integrator.json - line-based, no sed (the unit has none).
-#   5. Installs route guidance (RGI): the RGI jar, the cluster renderer with its
-#      compiled shaders, and a shim in front of mm-ipod that preloads the hook
-#      and starts the renderer's supervisor.  Skip it with RGI=0.
-#   6. Installs the CarPlay map in the cluster (AltScreen): its renderer, the
-#      renderer's compiled shaders and supervisor, and the marker that turns
-#      it on.  Needs route guidance; skip it alone with ALTSCREEN=0.
+#   5. Installs route guidance (RGI): the RGI jar, the cluster renderer, and a
+#      shim in front of mm-ipod that preloads the hook and starts the
+#      renderer's supervisor.  Skip it with RGI=0.
+#   6. Installs the CarPlay map in the cluster (AltScreen): its renderer and
+#      supervisor, and the marker that turns it on.  Needs route guidance;
+#      skip it alone with ALTSCREEN=0.
 #   7. Removes the pre-drawn maneuver frames, if an older install left them
 #      (with or without route guidance).
 #   8. Undoes a part left out this time (RGI=0, ALTSCREEN=0) that an earlier
@@ -41,6 +41,8 @@
 #      does not.
 #   9. On the first install of this version, sets the settings to their
 #      defaults; after that only the CarPlay settings menu changes them.
+#      On every install, turns on the maneuver symbol for the head-up display
+#      (rgd_keep_bap_symbol).
 #  10. Tells you to reboot.
 #
 # Everything is idempotent: running it twice changes nothing the second time.
@@ -85,14 +87,9 @@ ALT_SHADERS="main.vert video.frag intro.frag"
 ALT_ON=/mnt/app/altscreen_inject
 ALT_FORCE=/mnt/app/altscreen_force
 
-# The parking-sensor popup beside CarPlay replaces seven stock HMI classes, and
-# other firmware carries other versions of them: on CN P0916 the HMI never came
-# up (#27), on Q2 P5600 two of them differ too, and forcing it onto such
-# firmware is what kept leaving units on the start logo.  So it is off unless
-# asked for: PDC=1 (an empty PDC file on the card) installs it, and only on
-# K3346, whose classes it was built and checked against, and K3347, the same HMI
-# release.  Left out, an earlier copy is removed.
-PDC=${PDC:-0}
+# The parking-sensor popup beside CarPlay is on unless left out: PDC=0 (an
+# empty NO_PDC file on the card).  Left out, an earlier copy is removed.
+PDC=${PDC:-1}
 
 # The touchpad as arrow keys in CarPlay (dpad_hook.jar) and the album art in the
 # virtual cockpit (coverart_hook.jar) are on unless left out: DPAD=0 / COVERART=0
@@ -142,49 +139,17 @@ fi
 [ -d /mnt/app/eso ] || die "/mnt/app/eso not found - this is not an MHI2 unit"
 [ -f "$CFG" ] || die "$CFG not found - unexpected firmware layout, stopping"
 
-# The firmware train.  The jars replace stock HMI classes outright, and other
-# trains carry other versions of them: on MHI2_US_AUG22 neither the D-pad nor
-# route guidance even compiles, and on the unit that is a black main screen.
-# So anything that is not MHI2_*_AU37x_* stops here, before a single write.
-# MHI2_*_AU276_* (Audi Q2) is let through: its HMI classes are identical, and
-# the release is confirmed working on a Q2.
+# The firmware train: the only eligibility check.  The jars replace stock HMI
+# classes outright and the hook carries this firmware's offsets; other trains
+# carry other versions of them, and on the unit that can be a black main
+# screen.  So anything that is not K3346 or K3347 stops here, before a single
+# write.
 #
 # Two sources, the way M.I.B. reads them.  First the text file the software
 # update leaves on rcc's persist partition; then the EEPROM, 19 bytes at 0x3A0,
 # through modifyE2P on rcc.  The unit has no xxd, sed, tr or printf, so the
-# EEPROM bytes are compared as hex: "MHI2_" at 0..4, "_AU37x_" or "_AU276_"
-# at 7..13, the build ("P3242") at 14..18.  A trailing CR in the text file
-# is harmless: the pattern ends in *.
-#
-# European AU37x builds up to P3242 are older than the HMI classes replaced
-# here and are refused (TRAIN_OK=2).  P3242: compared against its lsd.jxe
-# (#70), the D-pad and route guidance do not compile - its ClusterService and
-# CarPlay input controller predate classes and constants they call.  P3620
-# works (#64); what lies between is unknown and let through.  Build numbers
-# are per region (CN P0817 and P1003 work), so only ER builds are compared.
-ER_OLDEST_OK=3243
-
-# er_build_too_old NNNN - true when the four digits are an ER build that
-# predates ER_OLDEST_OK.  Anything that is not four digits is not judged.
-er_build_too_old() {
-    case "$1" in
-        [0-9][0-9][0-9][0-9]) [ "$1" -lt "$ER_OLDEST_OK" ] ;;
-        *) return 1 ;;
-    esac
-}
-
-# The ER build number from the EEPROM bytes: region "ER" at 5..6 (45 52),
-# "P" at 14 (50), four ASCII digits at 15..18 (3x).  Prints nothing otherwise.
-er_build_from_hex() {
-    set -- $1
-    [ $# -ge 19 ] || return 0
-    case "$6 $7 ${15}" in "45 52 50") ;; *) return 0 ;; esac
-    _n=""
-    for _b in "${16}" "${17}" "${18}" "${19}"; do
-        case "$_b" in 3[0-9]) _n="$_n${_b#3}" ;; *) return 0 ;; esac
-    done
-    echo "$_n"
-}
+# EEPROM bytes are compared as hex.  A trailing CR in the text file is
+# harmless: the pattern ends in *.
 TRAIN=""
 for f in /net/rcc/mnt/efs-persist/SWDL/CachedTrain.txt /mnt/efs-persist/SWDL/CachedTrain.txt; do
     if [ -f "$f" ]; then
@@ -263,14 +228,10 @@ else
 fi
 
 if [ "$PDC" = "1" ]; then
-    case "$TRAIN" in
-        MHI2_*_AUG22_K3346*|MHI2_*_AUG22_K3347*) ;;
-        *) PDC=0
-           say "parking popup beside CarPlay: not checked on this firmware - left out" ;;
-    esac
+    say "parking popup beside CarPlay: ON (PDC=0 skips it)"
 else
     PDC=0
-    say "parking popup beside CarPlay: off (PDC=1 installs it)"
+    say "parking popup beside CarPlay: SKIPPED (PDC=0)"
 fi
 if [ "$PDC" = "1" ] && [ ! -f "$BIN_DIR/pdc_hook.jar" ]; then
     die "missing payload file: $BIN_DIR/pdc_hook.jar (or set PDC=0)"
@@ -880,6 +841,13 @@ else
     touch "$SETTINGS_STAMP" || die "could not create $SETTINGS_STAMP"
     say "ok: settings set to their defaults; change them in MENU > Audi smartphone interface > CarPlay settings"
 fi
+
+# rgd_keep_bap_symbol: while CarPlay's tile owns the cockpit, the jar sends the
+# real maneuver symbol over BAP instead of "no symbol"; the head-up display
+# takes its arrow from it and drops the arrow after ~3 s without it. Set on
+# every install; rm /mnt/app/rgd_keep_bap_symbol switches it off until then.
+touch /mnt/app/rgd_keep_bap_symbol || die "could not create /mnt/app/rgd_keep_bap_symbol"
+say "ok: maneuver symbol for the head-up display on (/mnt/app/rgd_keep_bap_symbol)"
 
 # Route guidance left out of an install that had it: undo it the way
 # uninstall.sh does - the shim first, so that mm-ipod starts stock even if

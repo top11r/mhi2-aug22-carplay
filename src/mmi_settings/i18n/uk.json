@@ -1,0 +1,21 @@
+{
+  "entry_row": "Перейти до налаштувань CarPlay",
+  "screen.main": "Налаштування CarPlay",
+  "screen.route_guidance": "Підказки маршруту",
+  "screen.cockpit_map": "Мапа у Virtual Cockpit",
+  "restart": "Перезапустити CarPlay",
+  "note.mmi_restart": "Набуде чинності після перезапуску MMI.",
+  "rgd_disable": "CarPlay у Virtual Cockpit",
+  "rgd_map_only": "Підказки у Virtual Cockpit",
+  "rgd_sport": "Примусово спортивний вигляд",
+  "rgd_sport.hint": "Лише якщо мапа ігнорує спорт-вигляд.",
+  "rgd_eta_default": "Спершу показувати час прибуття",
+  "rgd_no_arrow_fill": "Стрілка заповнюється біля повороту",
+  "rgd_cancel_native": "Скасовувати маршрут MMI у CarPlay",
+  "altscreen_cluster_off": "Мапа CarPlay у Virtual Cockpit",
+  "altscreen_force": "Пропонувати мапу бездротовим адаптерам",
+  "rgd_phone_off": "Вкладка телефону у Virtual Cockpit",
+  "rgd_phone_off.hint": "Дзвінки CarPlay: відповідь, утримання.",
+  "note.restarted": "CarPlay перезапущено. Підключіть iPhone знову.",
+  "note.not_saved": "Не вдалося зберегти налаштування."
+}
