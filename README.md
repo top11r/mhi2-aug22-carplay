@@ -20,7 +20,7 @@ what was tested on that firmware.
 
 | | |
 |---|---|
-| ![Route guidance in the maneuver tile](docs/rgi.jpg) | **Route guidance**: CarPlay turn-by-turn maneuvers in the cockpit's maneuver tile: the arrow, the distance, the street and lane guidance, drawn live. The arrow fills blue as the turn gets closer. Works with Apple Maps and Google Maps. |
+| ![Route guidance in the maneuver tile](docs/rgi.jpg) | **Route guidance**: CarPlay turn-by-turn maneuvers in the cockpit's maneuver tile: the arrow, the distance, the street and lane guidance, drawn live. The arrow fills blue as the turn gets closer. Cars with a head-up display show the maneuver arrow there too. Works with Apple Maps and Google Maps. |
 | ![Album art on the now-playing widget](docs/coverart.jpg) | **Album art**: CarPlay artwork on the cockpit's now-playing widget. |
 
 - **CarPlay map in the Virtual Cockpit** (above): the phone's navigation map (Apple
