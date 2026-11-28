@@ -4,6 +4,25 @@ Each release is on the [Releases](https://github.com/top11r/mhi2-aug22-carplay/r
 page, with a ready-made SD card archive. The history of the project this build is based
 on is in [chefranov's changelog](https://github.com/chefranov/mhi2-au37x-carplay/blob/main/CHANGELOG.md).
 
+## k3346-v1.4.0-beta1 — 2026-11-28
+
+> [!WARNING]
+> **Beta for `MHI2_*_AUG22_K3344` and `MHI2_*_AUG22_K3345`, not yet tested on a car.**
+> Have SSH over a USB Ethernet adapter (ASIX AX88772) ready before you install: if the
+> main screen stays black, `sh /mnt/app/root/carplay/uninstall.sh` over SSH puts everything back.
+> Results welcome in [#14](https://github.com/top11r/mhi2-aug22-carplay/issues/14).
+
+The release k3346-v1.4.0 with one change: the installer also accepts K3344 and K3345,
+from `CachedTrain.txt` or the EEPROM. Everything else on the card, all of `bin/`
+included, is unchanged from v1.4.0.
+
+- **K3344** (ER, MU1438): every main-unit and RCC image in the K3344 package has the
+  same checksums as in K3346 (build 2045). The only difference is the spare-part number
+  list (`tnrref.csv`), which says which hardware part numbers may take the update.
+- **K3345** (US, MU1439): every main-unit image is build 967, the build a K3347 unit
+  runs, and K3347 is confirmed on a car. The US package sold as "K3347" is this same
+  K3345 package.
+
 ## k3346-v1.4.0 — 2026-11-27
 
 The approach bar and the head-up display's arrow, parking sensors on by default and the

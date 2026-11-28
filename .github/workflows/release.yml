@@ -59,4 +59,7 @@ jobs:
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file notes.md
+        # A beta tag (k3346-vX.Y.Z-betaN) is a pre-release and never becomes Latest.
+        run: |
+          case "$GITHUB_REF_NAME" in *-beta*) PRE="--prerelease --latest=false" ;; *) PRE="" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file notes.md $PRE
