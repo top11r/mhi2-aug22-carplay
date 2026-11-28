@@ -15,10 +15,10 @@
 #
 # What it does:
 #   0. Checks the firmware train and stops, changing nothing, on anything
-#      that is not MHI2_*_AUG22_K3346* or K3347*, or when another CarPlay/HMI
+#      that is not MHI2_*_AUG22_K3344* to K3347*, or when another CarPlay/HMI
 #      mod is on the unit (MIBSI, mib2q-carplay-rgi, unknown jars;
 #      IGNORE_CONFLICTS=1 lets unknown jars through).  Every part below is
-#      for these two trains, so none checks the train again.
+#      for these trains, so none checks the train again.
 #      M.I.B.'s NavActiveIgnore jar is switched off, uninstall puts it back.
 #   1. Remounts /mnt/app and /mnt/system read-write.
 #   2. Backs up every file it is going to change, once, as <file>.orig.
@@ -129,7 +129,7 @@ die() {
 }
 
 : > "$LOG" 2>/dev/null
-say "=== MHI2 AU37x CarPlay patches - install (private K3346 build) ==="
+say "=== MHI2 AU37x CarPlay patches - install (private K3346 build, K3344/K3345 BETA) ==="
 if [ -f "$SRC_DIR/VERSION" ]; then
     read -r VERSION < "$SRC_DIR/VERSION"
     say "release: $VERSION"
@@ -142,7 +142,7 @@ fi
 # The firmware train: the only eligibility check.  The jars replace stock HMI
 # classes outright and the hook carries this firmware's offsets; other trains
 # carry other versions of them, and on the unit that can be a black main
-# screen.  So anything that is not K3346 or K3347 stops here, before a single
+# screen.  So anything that is not K3344 to K3347 stops here, before a single
 # write.
 #
 # Two sources, the way M.I.B. reads them.  First the text file the software
@@ -164,11 +164,15 @@ case "$TRAIN" in
     # K3347 (NAR): same HMI release (G22_C6_190300) and byte-identical CarPlay
     # natives as K3346; only 12 unrelated HMI classes differ.
     MHI2_*_AUG22_K3347*) TRAIN_OK=1 ;;
+    # K3344/K3345 BETA, untested on a car.  K3344 (ER, MU1438): every image in
+    # its package has K3346's checksums (build 2045), only the spare-part list
+    # differs.  K3345 (US, MU1439): build 967, the build a K3347 unit runs.
+    MHI2_*_AUG22_K3344*|MHI2_*_AUG22_K3345*) TRAIN_OK=1 ;;
     "") ;;
     *) TRAIN_OK=0 ;;
 esac
 
-# EEPROM: "MHI2_" at 0..4, "_AUG22_" at 7..13, "K3346" or "K3347" at 14..18.
+# EEPROM: "MHI2_" at 0..4, "_AUG22_" at 7..13, "K3344" to "K3347" at 14..18.
 if [ -z "$TRAIN_OK" ]; then
     HEX=""
     for tok in $(on -f rcc /net/rcc/usr/apps/modifyE2P r 3A0 19 2>/dev/null); do
@@ -181,6 +185,10 @@ if [ -z "$TRAIN_OK" ]; then
             TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3346 (from EEPROM)" ;;
         " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 37"*)
             TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3347 (from EEPROM)" ;;
+        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 34"*)
+            TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3344 (from EEPROM)" ;;
+        " 4"[dD]" 48 49 32 5"[fF]" "??" "??" 5"[fF]" 41 55 47 32 32 5"[fF]" 4"[bB]" 33 33 34 35"*)
+            TRAIN_OK=1; TRAIN="MHI2_??_AUG22_K3345 (from EEPROM)" ;;
         "") ;;
         *) TRAIN_OK=0; TRAIN="(EEPROM bytes:$HEX)" ;;
     esac
@@ -189,7 +197,7 @@ fi
 case "$TRAIN_OK" in
     1) say "firmware train: $TRAIN - ok" ;;
     0) say "!! firmware train: $TRAIN"
-       say "!! This private build is for MHI2_*_AUG22_K3346 and K3347 only: its jars are built"
+       say "!! This private build is for MHI2_*_AUG22_K3344 to K3347 only: its jars are built"
        say "!! against that firmware's HMI and its hook carries that firmware's"
        say "!! offsets; on another one they can leave the main screen black."
        die "unsupported firmware train" ;;
